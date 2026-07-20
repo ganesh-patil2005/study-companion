@@ -129,10 +129,8 @@ tr:nth-child(even){background:#f7f9fc}
       <div class="grid2" style="gap:10px">
         <div>
           <label>Subject</label>
-          <select id="log-subject">
-            <option>Physics</option><option>Chemistry</option>
-            <option>Mathematics</option><option>Biology</option>
-            <option>Organic Chemistry</option>
+          <select id="log-subject" onchange="onSubjectDP('log', this.value)">
+            <option value="">-- Select Subject --</option>
           </select>
         </div>
         <div>
@@ -146,9 +144,10 @@ tr:nth-child(even){background:#f7f9fc}
         </div>
       </div>
       <label>Chapter</label>
-      <input type="text" id="log-chapter" placeholder="e.g. Thermodynamics">
+      <select id="log-chapter" onchange="onChapterDP('log', this.value)"><option value="">-- Select Chapter --</option></select>
       <label>Topic</label>
-      <input type="text" id="log-topic" placeholder="e.g. First Law">
+      <input type="text" id="log-topic" list="log-dl-topic" placeholder="e.g. First Law" autocomplete="off">
+      <datalist id="log-dl-topic"></datalist>
       <div class="grid3" style="gap:8px;margin-top:4px">
         <div><label>Questions Solved</label><input type="number" id="log-total" value="0" min="0"></div>
         <div><label style="color:#28a745">Correct</label><input type="number" id="log-correct" value="0" min="0"></div>
@@ -212,10 +211,8 @@ tr:nth-child(even){background:#f7f9fc}
       <div class="grid2" style="gap:8px">
         <div>
           <label>Subject</label>
-          <select id="pt-subject">
-            <option>Physics</option><option>Chemistry</option>
-            <option>Mathematics</option><option>Biology</option>
-            <option>Organic Chemistry</option>
+          <select id="pt-subject" onchange="onSubjectDP('pt', this.value)">
+            <option value="">-- Select Subject --</option>
           </select>
         </div>
         <div>
@@ -228,8 +225,9 @@ tr:nth-child(even){background:#f7f9fc}
           </select>
         </div>
       </div>
-      <label>Chapter</label><input type="text" id="pt-chapter" placeholder="e.g. Kinematics">
-      <label>Topic</label><input type="text" id="pt-topic" placeholder="e.g. Projectile Motion">
+      <label>Chapter</label><select id="pt-chapter" onchange="onChapterDP('pt', this.value)"><option value="">-- Select Chapter --</option></select>
+      <label>Topic</label><input type="text" id="pt-topic" list="pt-dl-topic" placeholder="e.g. Projectile Motion" autocomplete="off">
+      <datalist id="pt-dl-topic"></datalist>
       <div class="grid3" style="gap:8px;margin-top:4px">
         <div><label>Target Qs</label><input type="number" id="pt-total" value="0" min="0"></div>
         <div><label style="color:#28a745">Expected Correct</label><input type="number" id="pt-correct" value="0" min="0"></div>
@@ -329,7 +327,7 @@ function closeHelp(){document.getElementById('help-overlay').classList.remove('o
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeHelp();});
 
 // ── DB INIT ──────────────────────────────────────────────────────────────────
-const dbReq = indexedDB.open('StudyCompanionDB', 7);
+const dbReq = indexedDB.open('StudyCompanionDB', 8);
 dbReq.onupgradeneeded = e => {
   const d = e.target.result;
   // Standard stores (keyPath: id, autoIncrement)
@@ -338,6 +336,14 @@ dbReq.onupgradeneeded = e => {
   });
   // dailyPlans uses date string as keyPath for direct get-by-date
   if(!d.objectStoreNames.contains('dailyPlans')) d.createObjectStore('dailyPlans',{keyPath:'date'});
+  // If dailyPlans was previously created with wrong keyPath (id), recreate it
+  else {
+    const existing = e.target.transaction.objectStore('dailyPlans');
+    if(existing.keyPath !== 'date'){
+      d.deleteObjectStore('dailyPlans');
+      d.createObjectStore('dailyPlans',{keyPath:'date'});
+    }
+  }
 };
 dbReq.onsuccess = e => {
   db = e.target.result;
@@ -359,6 +365,7 @@ function initDefaults(){
   renderLogList();
   onPlanDateChange();
   runComparison();
+  buildDataListsDP();
 }
 
 // ── TAB SWITCHER ─────────────────────────────────────────────────────────────
@@ -371,6 +378,7 @@ function showPane(id,btn){
 
 // ── LOG: SAVE / CLEAR / RENDER ────────────────────────────────────────────────
 function saveLog(){
+  if(!db){showToast('Database not ready. Please wait a moment and try again.',true);return;}
   const o={
     date:document.getElementById('log-date').value,
     startTime:document.getElementById('log-start').value,
@@ -390,9 +398,16 @@ function saveLog(){
   const saveLB=lbUnderstanding||lbFormula;
   const idv=document.getElementById('log-id').value;
   const storeList=saveLB?['dailyLogs','learning']:['dailyLogs'];
-  const tx=db.transaction(storeList,'readwrite');
+  let tx;
+  try{
+    tx=db.transaction(storeList,'readwrite');
+  }catch(err){
+    showToast('Store error: '+err.message+'. Try reloading the page.',true);
+    return;
+  }
   if(idv){o.id=+idv;tx.objectStore('dailyLogs').put(o);}
   else tx.objectStore('dailyLogs').add(o);
+  autoSaveToCatalogDP(o.subject, o.chapter, o.topic);
   if(saveLB){
     tx.objectStore('learning').add({subject:o.subject,chapter:o.chapter,topic:o.topic,notes:lbUnderstanding,formula:lbFormula});
   }
@@ -402,6 +417,7 @@ function saveLog(){
     renderLogList();
     showToast(saveLB?'Session saved! Also added to Learning Book.':'Session saved!');
   };
+  tx.onerror=()=>showToast('Save failed: '+tx.error+'. Try reloading the page.',true);
 }
 function clearLog(){
   ['log-id','log-chapter','log-topic','log-notes','lb-understanding','lb-formula'].forEach(i=>document.getElementById(i).value='');
@@ -426,8 +442,10 @@ function editLog(id){
     document.getElementById('log-start').value=r.startTime||'';
     document.getElementById('log-end').value=r.endTime||'';
     document.getElementById('log-subject').value=r.subject;
+    fillChapterDP('log', r.subject);
     document.getElementById('log-activity').value=r.activity;
     document.getElementById('log-chapter').value=r.chapter;
+    updateTopicDP('log', r.subject, r.chapter||'');
     document.getElementById('log-topic').value=r.topic;
     document.getElementById('log-total').value=r.total||0;
     document.getElementById('log-correct').value=r.correct||0;
@@ -508,6 +526,7 @@ function addPlanTask(){
     wrongQs:+document.getElementById('pt-wrong').value||0
   };
   if(!t.chapter||!t.topic){showToast('Enter chapter and topic.',true);return;}
+  autoSaveToCatalogDP(t.subject, t.chapter, t.topic);
   if(_editTaskIdx!==null){_stageTasks[_editTaskIdx]=t;_editTaskIdx=null;}
   else _stageTasks.push(t);
   _planDirty=true;
@@ -531,8 +550,10 @@ function editPlanTask(i){
   document.getElementById('pt-start').value=t.startTime;
   document.getElementById('pt-end').value=t.endTime;
   document.getElementById('pt-subject').value=t.subject;
+  fillChapterDP('pt', t.subject);
   document.getElementById('pt-activity').value=t.activity;
   document.getElementById('pt-chapter').value=t.chapter;
+  updateTopicDP('pt', t.subject, t.chapter||'');
   document.getElementById('pt-topic').value=t.topic;
   document.getElementById('pt-total').value=t.totalQs||0;
   document.getElementById('pt-correct').value=t.correctQs||0;
@@ -790,6 +811,137 @@ function buildComparison(date,planned,actuals,out){
 
   out.innerHTML=html;
 }
+
+// ── JEE CATALOG & DROPDOWN HELPERS (parameterized by prefix) ─────────────────
+const _JEE_DP={
+  "Physics":{"Mechanics":["Kinematics","Laws of Motion","Work Energy and Power","Rotational Motion","Gravitation","Simple Harmonic Motion","Fluid Mechanics","Elasticity","Surface Tension"],"Thermodynamics":["Thermal Properties","Laws of Thermodynamics","Kinetic Theory of Gases","Calorimetry","Heat Transfer"],"Electrostatics":["Electric Charges and Fields","Gauss Law","Electric Potential","Capacitance","Electric Dipole"],"Current Electricity":["Ohm's Law and Resistance","Kirchhoff's Laws","Wheatstone Bridge","RC Circuits","Potentiometer","EMF and Internal Resistance"],"Magnetism":["Magnetic Effects of Current","Biot-Savart Law","Electromagnetic Induction","AC Circuits","Transformers","Magnetic Properties"],"Optics":["Ray Optics","Wave Optics","Refraction and Lenses","Total Internal Reflection","Optical Instruments","Interference and Diffraction"],"Modern Physics":["Photoelectric Effect","Dual Nature","Atomic Models","Nuclear Physics","Radioactivity","Semiconductors","Logic Gates"],"Waves":["Wave Motion","Sound Waves","Doppler Effect","Standing Waves","Beats","Resonance"]},
+  "Chemistry":{"Physical Chemistry":["Mole Concept","Atomic Structure","Chemical Bonding","States of Matter","Thermodynamics","Chemical Equilibrium","Ionic Equilibrium","Electrochemistry","Chemical Kinetics","Solutions","Surface Chemistry","Redox Reactions"],"Organic Chemistry":["Basic Organic Concepts","IUPAC Nomenclature","Isomerism","Reaction Mechanisms","Alkanes Alkenes Alkynes","Aromatic Compounds","Haloalkanes and Haloarenes","Alcohols Phenols Ethers","Aldehydes and Ketones","Carboxylic Acids","Amines","Biomolecules","Polymers"],"Inorganic Chemistry":["Periodic Table","s-Block Elements","p-Block Elements","d and f Block Elements","Coordination Compounds","Metallurgy","Hydrogen","Qualitative Analysis"]},
+  "Mathematics":{"Algebra":["Sets Relations Functions","Complex Numbers","Permutation and Combination","Binomial Theorem","Sequences and Series","Matrices","Determinants","Probability","Quadratic Equations"],"Calculus":["Limits and Continuity","Differentiation","Application of Derivatives","Indefinite Integration","Definite Integration","Area Under Curves","Differential Equations"],"Coordinate Geometry":["Straight Lines","Circles","Parabola","Ellipse","Hyperbola","Pair of Straight Lines"],"Trigonometry":["Trigonometric Ratios","Trigonometric Equations","Inverse Trigonometric Functions","Heights and Distances","Properties of Triangle"],"Vectors and 3D Geometry":["Vectors Basics","Dot and Cross Product","3D Coordinate Geometry","Direction Cosines","Planes and Lines"]},
+  "Biology":{"Botany":["Cell Structure and Function","Cell Division","Plant Kingdom","Morphology of Plants","Anatomy of Plants","Plant Physiology","Photosynthesis","Respiration in Plants","Plant Reproduction","Genetics","Molecular Basis of Inheritance","Evolution","Biotechnology"],"Zoology":["Animal Kingdom","Structural Organisation in Animals","Human Digestion","Breathing and Gas Exchange","Body Fluids and Circulation","Excretory Products","Locomotion and Movement","Neural Control","Chemical Coordination","Reproduction in Organisms","Human Reproduction","Human Health and Disease","Microbes in Human Welfare","Ecosystems and Environment"]}
+};
+
+function seedCatalogDP(cb){
+  if(!db||!db.objectStoreNames.contains('catalog')){cb();return;}
+  const tx=db.transaction('catalog','readwrite');
+  const os=tx.objectStore('catalog');
+  os.count().onsuccess=ev=>{
+    if(ev.target.result>0){cb();return;}
+    Object.keys(_JEE_DP).forEach(sub=>{
+      os.add({type:'subject',value:sub,parent:''});
+      Object.keys(_JEE_DP[sub]).forEach(chap=>{
+        os.add({type:'chapter',value:chap,parent:sub});
+        (_JEE_DP[sub][chap]||[]).forEach(t=>os.add({type:'topic',value:t,parent:sub+'|'+chap}));
+      });
+    });
+    tx.oncomplete=cb;tx.onerror=cb;
+  };
+}
+
+function buildDataListsDP(){
+  if(!db)return;
+  seedCatalogDP(()=>{
+    const subjects=new Set(),subChap={},subTopic={};
+    let phase=2;
+    const finish=()=>{
+      if(--phase>0)return;
+      window._ss=subjects;window._sc=subChap;window._st=subTopic;
+      fillSubjectDP('log');fillSubjectDP('pt');
+    };
+    if(db.objectStoreNames.contains('catalog')){
+      db.transaction('catalog').objectStore('catalog').openCursor().onsuccess=e=>{
+        const c=e.target.result;
+        if(c){const v=c.value;
+          if(v.type==='subject')subjects.add(v.value);
+          else if(v.type==='chapter'){if(!subChap[v.parent])subChap[v.parent]=new Set();subChap[v.parent].add(v.value);}
+          else if(v.type==='topic'){if(!subTopic[v.parent])subTopic[v.parent]=new Set();subTopic[v.parent].add(v.value);}
+          c.continue();}else finish();
+      };
+    }else finish();
+    const recStores=['learning','practice','mistakes','formula','revision','dailyLogs'].filter(s=>db.objectStoreNames.contains(s));
+    let rp=recStores.length||1;
+    const rdone=()=>{if(--rp===0)finish();};
+    if(!recStores.length){rdone();return;}
+    recStores.forEach(store=>{
+      db.transaction(store).objectStore(store).openCursor().onsuccess=e=>{
+        const c=e.target.result;
+        if(c){const v=c.value;
+          if(v.subject){subjects.add(v.subject);
+            if(v.chapter){if(!subChap[v.subject])subChap[v.subject]=new Set();subChap[v.subject].add(v.chapter);
+              if(v.topic){const k=v.subject+'|'+v.chapter;if(!subTopic[k])subTopic[k]=new Set();subTopic[k].add(v.topic);}}}
+          c.continue();}else rdone();};
+    });
+  });
+}
+
+function fillSubjectDP(prefix){
+  const sel=document.getElementById(prefix+'-subject');
+  if(!sel)return;
+  const cur=sel.value;
+  sel.innerHTML='<option value="">-- Select Subject --</option>';
+  [...(window._ss||new Set())].sort().forEach(s=>{
+    const o=document.createElement('option');o.value=s;o.textContent=s;sel.appendChild(o);
+  });
+  const add=document.createElement('option');add.value='__new__';add.textContent='+ Add New Subject...';sel.appendChild(add);
+  if(cur&&cur!=='__new__')sel.value=cur;
+  fillChapterDP(prefix,(sel.value&&sel.value!=='__new__')?sel.value:'');
+}
+
+function fillChapterDP(prefix, subVal){
+  const sel=document.getElementById(prefix+'-chapter');
+  if(!sel)return;
+  const cur=sel.value;
+  sel.innerHTML='<option value="">-- Select Chapter --</option>';
+  const sc=window._sc||{};
+  [...(sc[subVal]||new Set())].sort().forEach(ch=>{
+    const o=document.createElement('option');o.value=ch;o.textContent=ch;sel.appendChild(o);
+  });
+  const add=document.createElement('option');add.value='__new__';add.textContent='+ Add New Chapter...';sel.appendChild(add);
+  if(cur&&cur!=='__new__')sel.value=cur;
+  updateTopicDP(prefix,subVal,(sel.value&&sel.value!=='__new__')?sel.value:'');
+}
+
+function onSubjectDP(prefix, subVal){
+  if(subVal==='__new__'){
+    const sel=document.getElementById(prefix+'-subject');
+    const v=(prompt('Enter new subject name:')||'').trim();
+    if(v){autoSaveToCatalogDP(v,null,null);const o=document.createElement('option');o.value=v;o.textContent=v;sel.insertBefore(o,sel.lastElementChild);sel.value=v;fillChapterDP(prefix,v);}
+    else sel.value='';
+    return;
+  }
+  fillChapterDP(prefix, subVal);
+}
+
+function onChapterDP(prefix, chapVal){
+  const subVal=(document.getElementById(prefix+'-subject')||{}).value||'';
+  if(chapVal==='__new__'){
+    const sel=document.getElementById(prefix+'-chapter');
+    const v=(prompt('Enter new chapter name:')||'').trim();
+    if(v){autoSaveToCatalogDP(subVal,v,null);const o=document.createElement('option');o.value=v;o.textContent=v;sel.insertBefore(o,sel.lastElementChild);sel.value=v;updateTopicDP(prefix,subVal,v);}
+    else sel.value='';
+    return;
+  }
+  updateTopicDP(prefix, subVal, chapVal);
+}
+
+function updateTopicDP(prefix, subVal, chapVal){
+  const dlt=document.getElementById(prefix+'-dl-topic');if(!dlt)return;
+  dlt.innerHTML='';
+  const st=window._st||{};
+  [...(st[subVal+'|'+chapVal]||new Set())].sort().forEach(t=>{
+    const o=document.createElement('option');o.value=t;dlt.appendChild(o);
+  });
+}
+
+function autoSaveToCatalogDP(sub,chap,topic){
+  if(!sub||sub==='__new__'||!db||!db.objectStoreNames.contains('catalog'))return;
+  const ss=window._ss||new Set(),sc=window._sc||{},st=window._st||{};
+  const toAdd=[];
+  if(!ss.has(sub)){toAdd.push({type:'subject',value:sub,parent:''});ss.add(sub);window._ss=ss;}
+  if(chap&&chap!=='__new__'){if(!sc[sub])sc[sub]=new Set();if(!sc[sub].has(chap)){toAdd.push({type:'chapter',value:chap,parent:sub});sc[sub].add(chap);}}
+  if(topic&&topic.trim()&&chap&&chap!=='__new__'){const k=sub+'|'+chap;if(!st[k])st[k]=new Set();if(!st[k].has(topic)){toAdd.push({type:'topic',value:topic,parent:k});st[k].add(topic);}}
+  if(toAdd.length){const tx=db.transaction('catalog','readwrite');toAdd.forEach(r=>tx.objectStore('catalog').add(r));fillSubjectDP('log');fillSubjectDP('pt');}
+}
+// ── End catalog helpers ──────────────────────────────────────────────────────
 
 if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));}
 </script>

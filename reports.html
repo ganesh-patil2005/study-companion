@@ -161,7 +161,7 @@ const _rendered={};
 function escH(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>')}
 function esc(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
 
-const req=indexedDB.open('StudyCompanionDB',7);
+const req=indexedDB.open('StudyCompanionDB',8);
 req.onupgradeneeded=e=>{
   const d=e.target.result;
   ['learning','practice','mistakes','formula','journal','revision','parent','catalog','dailyLogs'].forEach(s=>{

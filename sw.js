@@ -1,7 +1,7 @@
 // Study Companion - Service Worker
 // Caches all app pages for fully offline use
 
-const CACHE = 'study-companion-v4';
+const CACHE = 'study-companion-v5';
 const FILES = [
   './index.html',
   './learning_book.html',

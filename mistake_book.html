@@ -112,7 +112,7 @@ tr:nth-child(even){background:#f7f9fc}
 <div id="toast" class="toast"></div>
 <script>
 let db;
-const req=indexedDB.open('StudyCompanionDB',7);
+const req=indexedDB.open('StudyCompanionDB',8);
 req.onupgradeneeded=e=>{
   const d=e.target.result;
   ['learning','practice','mistakes','formula','journal','revision','parent','catalog','dailyLogs'].forEach(s=>{
