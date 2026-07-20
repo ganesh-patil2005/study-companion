@@ -1,0 +1,797 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><link rel="manifest" href="manifest.json"><meta name="theme-color" content="#2f6fed"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Study Companion">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Study Companion &#x2013; Daily Planner</title>
+<style>
+body{margin:0;font-family:Segoe UI,Arial;background:#eef2f7}
+.header{background:#2f6fed;color:#fff;padding:18px 30px;font-size:28px;font-weight:bold}
+.nav{background:#fff;padding:10px 22px;border-bottom:1px solid #ddd;display:flex;align-items:center;flex-wrap:wrap;gap:2px}
+.nav a{margin-right:12px;color:#2f6fed;text-decoration:none;font-weight:600;font-size:14px}
+.nav a:hover{text-decoration:underline}
+.nav a.active-nav{color:#e67e22;border-bottom:2px solid #e67e22}
+.help-btn{margin-left:auto;padding:6px 14px;background:#f0f5ff;color:#2f6fed;border:1px solid #b8caf5;border-radius:14px;cursor:pointer;font-size:13px;font-weight:700;font-family:Segoe UI,Arial}
+.help-btn:hover{background:#2f6fed;color:#fff}
+.ptabs{background:#fff;border-bottom:2px solid #dde4f5;padding:0 22px;display:flex;gap:0}
+.ptab{padding:11px 18px;cursor:pointer;font-size:14px;font-weight:600;color:#666;border:none;background:none;border-bottom:3px solid transparent;margin-bottom:-2px;font-family:Segoe UI,Arial}
+.ptab.active{color:#2f6fed;border-bottom-color:#2f6fed}
+.ptab:hover:not(.active){color:#2f6fed;background:#f5f8ff}
+.ppane{display:none}.ppane.active{display:block;padding:22px 28px;max-width:1100px;margin:0 auto}
+.card{background:#fff;border-radius:10px;padding:20px;box-shadow:0 2px 10px rgba(0,0,0,.1);margin-bottom:18px}
+.card h3{margin:0 0 14px;color:#2f6fed;font-size:15px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
+label{display:block;font-weight:600;font-size:13px;margin:10px 0 3px}
+input,select,textarea{width:100%;padding:9px 10px;border:1px solid #ccc;border-radius:6px;box-sizing:border-box;font-size:14px;font-family:Segoe UI,Arial}
+textarea{height:72px;resize:vertical}
+button{padding:10px 18px;background:#2f6fed;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:14px;font-family:Segoe UI,Arial;font-weight:600}
+button:hover{opacity:.88}
+.btn-sec{background:#6c757d}.btn-sm{padding:5px 12px;font-size:12px}.btn-warn{background:#e67e22}.btn-ok{background:#28a745}
+.actions{margin-top:14px;display:flex;gap:8px;flex-wrap:wrap}
+table{width:100%;border-collapse:collapse;font-size:13px;margin-top:8px}
+th{background:#2f6fed;color:#fff;padding:9px 11px;text-align:left}
+td{border:1px solid #ddd;padding:8px 11px;vertical-align:top}
+tr:nth-child(even){background:#f7f9fc}
+.badge{display:inline-block;padding:2px 9px;border-radius:10px;font-size:12px;font-weight:700}
+.b-done{background:#edfaf1;color:#28a745}
+.b-partial{background:#fff8e1;color:#e67e22}
+.b-missed{background:#fff0f0;color:#e74c3c}
+.b-extra{background:#e3f2fd;color:#1565c0}
+.b-info{background:#e3f2fd;color:#1565c0}
+.metric-row{display:flex;gap:12px;margin-bottom:18px;flex-wrap:wrap}
+.metric-box{flex:1;min-width:130px;background:#f0f5ff;border-radius:8px;padding:13px;text-align:center}
+.metric-box .num{font-size:28px;font-weight:700;color:#2f6fed}
+.metric-box .lbl{font-size:12px;color:#888;margin-top:2px}
+.metric-box.green .num{color:#28a745}.metric-box.green{background:#edfaf1}
+.metric-box.red .num{color:#e74c3c}.metric-box.red{background:#fff0f0}
+.metric-box.orange .num{color:#e67e22}.metric-box.orange{background:#fff8e1}
+.bar-bg{background:#e8ecf5;border-radius:6px;height:14px;overflow:hidden;flex:1}
+.bar-fill{height:14px;border-radius:6px;transition:width .4s}
+.bar-row{display:flex;align-items:center;gap:8px;margin-bottom:7px;font-size:13px}
+.bar-label{width:130px;flex-shrink:0;text-align:right;color:#555;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px}
+.bar-val{width:44px;font-size:12px;color:#444}
+.cmp-plan{background:#f0fdf4;border-left:4px solid #28a745;padding:12px 14px;border-radius:0 8px 8px 0;margin-bottom:8px}
+.cmp-actual{background:#f0f5ff;border-left:4px solid #2f6fed;padding:12px 14px;border-radius:0 8px 8px 0;margin-bottom:6px}
+.cmp-missed{background:#fff5f5;border-left:4px solid #e74c3c;padding:12px 14px;border-radius:0 8px 8px 0;margin-bottom:8px}
+.cmp-extra{background:#fffbf0;border-left:4px solid #e67e22;padding:12px 14px;border-radius:0 8px 8px 0;margin-bottom:8px}
+.section-title{font-size:15px;font-weight:700;color:#2f6fed;margin:22px 0 10px;border-bottom:2px solid #eef;padding-bottom:5px}
+.section-title:first-child{margin-top:0}
+.date-nav{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+.date-nav input[type=date]{width:auto;flex-shrink:0}
+.date-nav button{padding:7px 14px;font-size:13px}
+.plan-task-row{background:#f7f9ff;border:1px solid #d5e0f5;padding:10px 14px;border-radius:7px;margin-bottom:7px;display:flex;justify-content:space-between;align-items:center;gap:8px}
+.plan-task-row .pt-info{flex:1;font-size:13px}
+.plan-task-row .pt-time{font-family:monospace;font-weight:700;color:#2f6fed;font-size:13px;margin-right:8px}
+.plan-task-row .pt-actions{display:flex;gap:5px}
+.tag{display:inline-block;background:#e3f2fd;color:#1565c0;border-radius:4px;padding:1px 7px;font-size:11px;font-weight:700;margin-right:4px}
+.tag-orange{background:#fff3e0;color:#e65100}
+.lb-toggle{display:flex;align-items:center;gap:8px;cursor:pointer;padding:9px 12px;background:#f0f5ff;border:1px dashed #b8caf5;border-radius:7px;margin-top:12px;font-size:13px;font-weight:700;color:#2f6fed;user-select:none}
+.lb-toggle:hover{background:#e3ebff}
+.lb-panel{display:none;margin-top:8px;padding:12px 14px;background:#f7f9ff;border:1px solid #d5e0f5;border-radius:7px}
+.lb-panel.open{display:block}
+.lb-linked-note{font-size:11px;color:#777;margin-top:4px}
+.empty-state{text-align:center;padding:36px 16px;color:#bbb}
+.empty-state .es-icon{font-size:36px}
+.empty-state p{margin:8px 0 0;font-size:14px}
+.toast{position:fixed;top:20px;right:20px;background:#28a745;color:#fff;padding:12px 22px;border-radius:8px;font-size:15px;font-weight:600;z-index:9999;box-shadow:0 3px 14px rgba(0,0,0,.25);display:none}
+/* Help modal */
+.help-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:10000;justify-content:center;align-items:flex-start;padding-top:40px}
+.help-overlay.open{display:flex}
+.help-modal{background:#fff;border-radius:12px;width:720px;max-height:82vh;overflow-y:auto;box-shadow:0 8px 40px rgba(0,0,0,.3)}
+.help-modal-head{background:#2f6fed;color:#fff;padding:16px 22px;border-radius:12px 12px 0 0;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:1}
+.help-modal-head h3{margin:0;font-size:17px}
+.help-close{background:none;border:none;color:#fff;font-size:24px;cursor:pointer;line-height:1;padding:0 4px}
+.help-body{padding:22px 26px;font-size:14px;line-height:1.75;color:#333}
+.help-body h4{color:#2f6fed;margin:18px 0 6px;font-size:15px;border-bottom:1px solid #e5eaf5;padding-bottom:4px}
+.help-body h4:first-child{margin-top:0}
+.help-body ul{margin:4px 0 10px 18px;padding:0}
+.help-body li{margin-bottom:5px}
+.help-body .tip{background:#fff8e1;border-left:4px solid #f0b429;padding:9px 13px;border-radius:0 6px 6px 0;margin:10px 0;font-size:13px}
+.help-body .outcome{background:#edfaf1;border-left:4px solid #28a745;padding:9px 13px;border-radius:0 6px 6px 0;margin:10px 0;font-size:13px}
+@media(max-width:700px){.grid2,.grid3{grid-template-columns:1fr}.ppane{padding:14px 10px}.bar-label{width:80px}}
+</style>
+</head>
+<body>
+<div class="header">&#x1F4DA; Study Companion</div>
+<div class="nav">
+  <a href="index.html">Dashboard</a>
+  <a href="learning_book.html">Learning</a>
+  <a href="practice_book.html">Practice</a>
+  <a href="mistake_book.html">Mistakes</a>
+  <a href="formula_book.html">Formula</a>
+  <a href="success_journal.html">Journal</a>
+  <a href="revision_planner.html">Revision</a>
+  <a href="parent_dashboard.html">Parent</a>
+  <a href="reports.html" style="color:#e67e22;font-weight:700">&#x1F4CA; Reports</a>
+  <a href="daily_planner.html" class="active-nav">&#x1F4C5; Planner</a>
+  <button class="help-btn" onclick="openHelp()">&#x2753; Help</button>
+</div>
+
+<div class="ptabs">
+  <button class="ptab active" onclick="showPane('log',this)">&#x270F; Daily Study Log</button>
+  <button class="ptab" onclick="showPane('plan',this)">&#x1F3AF; Plan Builder</button>
+  <button class="ptab" onclick="showPane('compare',this)">&#x1F4CA; Plan vs Actual</button>
+</div>
+
+<!-- ── TAB 1: DAILY STUDY LOG ─────────────────────────────────────────────── -->
+<div id="pane-log" class="ppane active">
+  <div class="grid2">
+    <div class="card">
+      <h3>&#x270F; Log Study Session</h3>
+      <input type="hidden" id="log-id">
+      <label>Date</label>
+      <input type="date" id="log-date">
+      <div class="grid2" style="gap:10px">
+        <div><label>Start Time</label><input type="time" id="log-start"></div>
+        <div><label>End Time</label><input type="time" id="log-end"></div>
+      </div>
+      <div class="grid2" style="gap:10px">
+        <div>
+          <label>Subject</label>
+          <select id="log-subject">
+            <option>Physics</option><option>Chemistry</option>
+            <option>Mathematics</option><option>Biology</option>
+            <option>Organic Chemistry</option>
+          </select>
+        </div>
+        <div>
+          <label>Activity</label>
+          <select id="log-activity">
+            <option>Reading</option><option>Examples</option><option>DPP</option>
+            <option>PYQ</option><option>Revision</option><option>Formula Revision</option>
+            <option>Notes</option><option>Topic Test</option><option>Mock Test</option>
+            <option>Advanced Problems</option>
+          </select>
+        </div>
+      </div>
+      <label>Chapter</label>
+      <input type="text" id="log-chapter" placeholder="e.g. Thermodynamics">
+      <label>Topic</label>
+      <input type="text" id="log-topic" placeholder="e.g. First Law">
+      <div class="grid3" style="gap:8px;margin-top:4px">
+        <div><label>Questions Solved</label><input type="number" id="log-total" value="0" min="0"></div>
+        <div><label style="color:#28a745">Correct</label><input type="number" id="log-correct" value="0" min="0"></div>
+        <div><label style="color:#e74c3c">Wrong</label><input type="number" id="log-wrong" value="0" min="0"></div>
+      </div>
+      <label>Notes / Remarks</label>
+      <textarea id="log-notes" placeholder="Optional notes about this session..."></textarea>
+      <div class="lb-toggle" onclick="toggleLB(this)">
+        <span id="lb-arrow">&#x25BA;</span> &#x1F4D8; Also save to Learning Book <small style="font-weight:400;color:#888">(optional)</small>
+      </div>
+      <div id="lb-panel" class="lb-panel">
+        <div style="font-size:12px;color:#555;margin-bottom:8px">These fields will be saved as a <b>Learning Book</b> entry for the same Subject / Chapter / Topic.</div>
+        <label>My Understanding</label>
+        <textarea id="lb-understanding" placeholder="Explain in your own words what you learned in this session..."></textarea>
+        <label>Key Formula / Trick</label>
+        <textarea id="lb-formula" placeholder="Key formulas, shortcuts or tricks from this session..." style="height:56px"></textarea>
+        <div class="lb-linked-note">&#x2139;&#xFE0F; Leave blank to skip Learning Book. No duplicate is created if both fields are empty.</div>
+      </div>
+      <div class="actions">
+        <button onclick="saveLog()">&#x1F4BE; Save Session</button>
+        <button class="btn-sec" onclick="clearLog()">&#x2715; Clear</button>
+      </div>
+    </div>
+    <div class="card">
+      <h3>&#x1F4CB; Sessions for Date</h3>
+      <div class="date-nav" style="margin-bottom:12px">
+        <input type="date" id="log-view-date" onchange="renderLogList()">
+        <button class="btn-sec" style="font-size:12px;padding:7px 10px" onclick="navLogDate(-1)">&#x25C4;</button>
+        <button class="btn-sec" style="font-size:12px;padding:7px 10px" onclick="navLogDate(0)">Today</button>
+        <button class="btn-sec" style="font-size:12px;padding:7px 10px" onclick="navLogDate(1)">&#x25BA;</button>
+      </div>
+      <div id="log-list"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ── TAB 2: PLAN BUILDER ─────────────────────────────────────────────────── -->
+<div id="pane-plan" class="ppane">
+  <div class="grid2">
+    <div class="card">
+      <h3>&#x1F3AF; Build Day Plan</h3>
+      <div class="date-nav">
+        <input type="date" id="plan-date" onchange="onPlanDateChange()">
+        <button class="btn-sec" style="font-size:12px;padding:7px 10px" onclick="navPlanDate(-1)">&#x25C4; Prev</button>
+        <button class="btn-sec" style="font-size:12px;padding:7px 10px" onclick="navPlanDate(0)">Today</button>
+        <button class="btn-sec" style="font-size:12px;padding:7px 10px" onclick="navPlanDate(1)">Next &#x25BA;</button>
+      </div>
+      <div style="background:#f7f9ff;border:1px solid #d5e0f5;border-radius:8px;padding:14px;margin-bottom:14px">
+        <div style="font-size:12px;font-weight:700;color:#2f6fed;margin-bottom:10px">&#x1F4CB; Clone Plan from Another Date</div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <input type="date" id="clone-source" style="flex:1">
+          <button onclick="clonePlan()" style="font-size:12px;padding:7px 14px;white-space:nowrap">Clone</button>
+        </div>
+        <div style="font-size:11px;color:#888;margin-top:5px">Copies all tasks from source date into the current plan date as a draft.</div>
+      </div>
+      <div id="task-form-title" style="font-size:13px;font-weight:700;color:#555;margin-bottom:8px">Add Task to Plan</div>
+      <div class="grid2" style="gap:8px">
+        <div><label>Start Time</label><input type="time" id="pt-start" value="09:00"></div>
+        <div><label>End Time</label><input type="time" id="pt-end" value="10:30"></div>
+      </div>
+      <div class="grid2" style="gap:8px">
+        <div>
+          <label>Subject</label>
+          <select id="pt-subject">
+            <option>Physics</option><option>Chemistry</option>
+            <option>Mathematics</option><option>Biology</option>
+            <option>Organic Chemistry</option>
+          </select>
+        </div>
+        <div>
+          <label>Activity</label>
+          <select id="pt-activity">
+            <option>Reading</option><option>Examples</option><option>DPP</option>
+            <option>PYQ</option><option>Revision</option><option>Formula Revision</option>
+            <option>Notes</option><option>Topic Test</option><option>Mock Test</option>
+            <option>Advanced Problems</option>
+          </select>
+        </div>
+      </div>
+      <label>Chapter</label><input type="text" id="pt-chapter" placeholder="e.g. Kinematics">
+      <label>Topic</label><input type="text" id="pt-topic" placeholder="e.g. Projectile Motion">
+      <div class="grid3" style="gap:8px;margin-top:4px">
+        <div><label>Target Qs</label><input type="number" id="pt-total" value="0" min="0"></div>
+        <div><label style="color:#28a745">Expected Correct</label><input type="number" id="pt-correct" value="0" min="0"></div>
+        <div><label style="color:#e74c3c">Max Wrong</label><input type="number" id="pt-wrong" value="0" min="0"></div>
+      </div>
+      <div class="actions">
+        <button id="pt-add-btn" onclick="addPlanTask()">+ Add Task</button>
+        <button class="btn-sec" onclick="cancelTaskEdit()">Clear</button>
+      </div>
+    </div>
+    <div class="card">
+      <h3>&#x1F4DD; Staged Plan for <span id="plan-date-label">—</span></h3>
+      <div id="staged-tasks"></div>
+      <div class="actions" style="margin-top:14px">
+        <button class="btn-ok" onclick="savePlan()">&#x1F4BE; Save Full Plan</button>
+        <button class="btn-warn" onclick="clearPlan()">&#x1F5D1; Clear Plan</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── TAB 3: PLAN VS ACTUAL ──────────────────────────────────────────────── -->
+<div id="pane-compare" class="ppane">
+  <div class="date-nav">
+    <label style="margin:0;font-weight:700;color:#555;font-size:14px">Select Date:</label>
+    <input type="date" id="cmp-date" onchange="runComparison()">
+    <button class="btn-sec" style="font-size:12px;padding:7px 10px" onclick="navCmpDate(-1)">&#x25C4; Prev</button>
+    <button class="btn-sec" style="font-size:12px;padding:7px 10px" onclick="navCmpDate(0)">Today</button>
+    <button class="btn-sec" style="font-size:12px;padding:7px 10px" onclick="navCmpDate(1)">Next &#x25BA;</button>
+  </div>
+  <div id="cmp-output"></div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<!-- ── HELP MODAL ──────────────────────────────────────────────────────────── -->
+<div id="help-overlay" class="help-overlay" onclick="if(event.target===this)closeHelp()">
+  <div class="help-modal">
+    <div class="help-modal-head">
+      <h3>&#x2753; Daily Planner &mdash; Help &amp; Guide</h3>
+      <button class="help-close" onclick="closeHelp()">&#x00D7;</button>
+    </div>
+    <div class="help-body">
+      <h4>Purpose</h4>
+      <p>The Daily Planner lets you <b>plan your study day in advance</b>, <b>log what you actually did</b>, then <b>compare the two</b> to see where you met your targets and where you fell short.</p>
+
+      <h4>&#x270F; Tab 1 &mdash; Daily Study Log</h4>
+      <ul>
+        <li>Log each study session with subject, chapter, topic, time slot, and questions solved.</li>
+        <li>Use the date picker + arrows to view sessions for any past date.</li>
+        <li>Click <b>Edit</b> on any logged session to modify it.</li>
+        <li><b>Also save to Learning Book</b> &mdash; expand the blue toggle at the bottom of the form to add &ldquo;My Understanding&rdquo; and &ldquo;Key Formula&rdquo; for the same chapter. Saving will create an entry in the Learning Book automatically &mdash; no need to visit the Learning Book page separately. Leave both fields blank to skip.</li>
+      </ul>
+      <div class="tip"><b>Tip:</b> Log sessions as you finish them, not at the end of the day. Expand the Learning Book section right after finishing a chapter to capture concepts while they are fresh &mdash; one save, two records.</div>
+
+      <h4>&#x1F3AF; Tab 2 &mdash; Plan Builder</h4>
+      <ul>
+        <li>Set the date, then add individual task blocks (time slot, subject, chapter, activity, expected questions).</li>
+        <li>Use <b>Clone Plan</b> to copy a previous day's plan as a starting point. Edit as needed, then Save.</li>
+        <li>Each task shows in the staged list on the right. Click Edit or &times; to modify before saving.</li>
+        <li>Click <b>Save Full Plan</b> to lock the plan for that date.</li>
+      </ul>
+      <div class="tip"><b>Tip:</b> Build tomorrow's plan the night before. Even a rough plan is better than no plan.</div>
+
+      <h4>&#x1F4CA; Tab 3 &mdash; Plan vs Actual (most important)</h4>
+      <p>Select a date to see the full comparison. The report shows:</p>
+      <ul>
+        <li><b>Summary metrics</b> &mdash; planned vs actual: time, questions, accuracy.</li>
+        <li><b>Completion Rate</b> &mdash; % of planned tasks that were actually executed (matched by subject + chapter + activity).</li>
+        <li><b>Subject Coverage</b> &mdash; how many planned tasks per subject were done.</li>
+        <li><b>Task-level comparison</b>:
+          <ul>
+            <li><span style="color:#28a745;font-weight:700">&#x2705; Done</span> &mdash; A matching actual session was logged for this planned task.</li>
+            <li><span style="color:#e67e22;font-weight:700">&#x26A1; Partial</span> &mdash; A session was logged but questions or time were significantly lower than planned.</li>
+            <li><span style="color:#e74c3c;font-weight:700">&#x274C; Missed</span> &mdash; No actual session found matching this planned task.</li>
+          </ul>
+        </li>
+        <li><b>Bonus Sessions</b> &mdash; sessions you logged that were not in the plan (unplanned extra work).</li>
+        <li><b>Accuracy Gap</b> &mdash; difference between your planned accuracy target and what you actually achieved.</li>
+      </ul>
+      <div class="outcome"><b>How to use it:</b> Review last night&rsquo;s plan vs actual every morning. Any missed tasks should be rescheduled. Any subject consistently missed means your time allocation is off &mdash; revise the plan.</div>
+      <div class="tip"><b>Tip:</b> A completion rate above 70% is excellent. Below 50% means your plan is too ambitious or you have distractions to address.</div>
+    </div>
+  </div>
+</div>
+
+<script>
+const TODAY = (()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');})();
+const TTIME = new Date().toTimeString().slice(0,5);
+
+let db, _stageTasks=[], _editTaskIdx=null, _planDirty=false;
+
+function escH(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function showToast(m,err){const t=document.getElementById('toast');t.textContent=m||'Saved!';t.style.background=err?'#e74c3c':'#28a745';t.style.display='block';clearTimeout(t._t);t._t=setTimeout(()=>t.style.display='none',2800);}
+function openHelp(){document.getElementById('help-overlay').classList.add('open');document.body.style.overflow='hidden';}
+function closeHelp(){document.getElementById('help-overlay').classList.remove('open');document.body.style.overflow='';}
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeHelp();});
+
+// ── DB INIT ──────────────────────────────────────────────────────────────────
+const dbReq = indexedDB.open('StudyCompanionDB', 7);
+dbReq.onupgradeneeded = e => {
+  const d = e.target.result;
+  // Standard stores (keyPath: id, autoIncrement)
+  ['learning','practice','mistakes','formula','journal','revision','parent','catalog','dailyLogs'].forEach(s => {
+    if(!d.objectStoreNames.contains(s)) d.createObjectStore(s,{keyPath:'id',autoIncrement:true});
+  });
+  // dailyPlans uses date string as keyPath for direct get-by-date
+  if(!d.objectStoreNames.contains('dailyPlans')) d.createObjectStore('dailyPlans',{keyPath:'date'});
+};
+dbReq.onsuccess = e => {
+  db = e.target.result;
+  initDefaults();
+};
+dbReq.onerror = () => showToast('DB error', true);
+
+function initDefaults(){
+  document.getElementById('log-date').value = TODAY;
+  document.getElementById('log-start').value = TTIME;
+  document.getElementById('log-end').value = TTIME;
+  document.getElementById('log-view-date').value = TODAY;
+  document.getElementById('plan-date').value = TODAY;
+  document.getElementById('plan-date-label').textContent = TODAY;
+  document.getElementById('cmp-date').value = TODAY;
+  // clone default = yesterday
+  const yd=new Date();yd.setDate(yd.getDate()-1);
+  document.getElementById('clone-source').value=yd.getFullYear()+'-'+String(yd.getMonth()+1).padStart(2,'0')+'-'+String(yd.getDate()).padStart(2,'0');
+  renderLogList();
+  onPlanDateChange();
+  runComparison();
+}
+
+// ── TAB SWITCHER ─────────────────────────────────────────────────────────────
+function showPane(id,btn){
+  document.querySelectorAll('.ppane').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.ptab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('pane-'+id).classList.add('active');
+  if(btn)btn.classList.add('active');
+}
+
+// ── LOG: SAVE / CLEAR / RENDER ────────────────────────────────────────────────
+function saveLog(){
+  const o={
+    date:document.getElementById('log-date').value,
+    startTime:document.getElementById('log-start').value,
+    endTime:document.getElementById('log-end').value,
+    subject:document.getElementById('log-subject').value,
+    activity:document.getElementById('log-activity').value,
+    chapter:document.getElementById('log-chapter').value.trim(),
+    topic:document.getElementById('log-topic').value.trim(),
+    total:+document.getElementById('log-total').value||0,
+    correct:+document.getElementById('log-correct').value||0,
+    wrong:+document.getElementById('log-wrong').value||0,
+    notes:document.getElementById('log-notes').value.trim()
+  };
+  if(!o.date||!o.chapter||!o.topic){showToast('Fill in date, chapter and topic.',true);return;}
+  const lbUnderstanding=document.getElementById('lb-understanding').value.trim();
+  const lbFormula=document.getElementById('lb-formula').value.trim();
+  const saveLB=lbUnderstanding||lbFormula;
+  const idv=document.getElementById('log-id').value;
+  const storeList=saveLB?['dailyLogs','learning']:['dailyLogs'];
+  const tx=db.transaction(storeList,'readwrite');
+  if(idv){o.id=+idv;tx.objectStore('dailyLogs').put(o);}
+  else tx.objectStore('dailyLogs').add(o);
+  if(saveLB){
+    tx.objectStore('learning').add({subject:o.subject,chapter:o.chapter,topic:o.topic,notes:lbUnderstanding,formula:lbFormula});
+  }
+  tx.oncomplete=()=>{
+    clearLog();
+    document.getElementById('log-view-date').value=o.date;
+    renderLogList();
+    showToast(saveLB?'Session saved! Also added to Learning Book.':'Session saved!');
+  };
+}
+function clearLog(){
+  ['log-id','log-chapter','log-topic','log-notes','lb-understanding','lb-formula'].forEach(i=>document.getElementById(i).value='');
+  ['log-total','log-correct','log-wrong'].forEach(i=>document.getElementById(i).value=0);
+  document.getElementById('log-date').value=TODAY;
+  document.getElementById('log-start').value=TTIME;
+  document.getElementById('log-end').value=TTIME;
+  const panel=document.getElementById('lb-panel');if(panel){panel.classList.remove('open');}
+  const arrow=document.getElementById('lb-arrow');if(arrow){arrow.textContent='\u25BA';}
+}
+function toggleLB(el){
+  const panel=document.getElementById('lb-panel');
+  const arrow=document.getElementById('lb-arrow');
+  panel.classList.toggle('open');
+  arrow.textContent=panel.classList.contains('open')?'\u25BC':'\u25BA';
+}
+function editLog(id){
+  db.transaction('dailyLogs').objectStore('dailyLogs').get(id).onsuccess=e=>{
+    const r=e.target.result;
+    document.getElementById('log-id').value=r.id;
+    document.getElementById('log-date').value=r.date;
+    document.getElementById('log-start').value=r.startTime||'';
+    document.getElementById('log-end').value=r.endTime||'';
+    document.getElementById('log-subject').value=r.subject;
+    document.getElementById('log-activity').value=r.activity;
+    document.getElementById('log-chapter').value=r.chapter;
+    document.getElementById('log-topic').value=r.topic;
+    document.getElementById('log-total').value=r.total||0;
+    document.getElementById('log-correct').value=r.correct||0;
+    document.getElementById('log-wrong').value=r.wrong||0;
+    document.getElementById('log-notes').value=r.notes||'';
+    showPane('log',document.querySelector('.ptab'));
+    window.scrollTo({top:0,behavior:'smooth'});
+  };
+}
+function deleteLog(id){
+  if(!confirm('Delete this session?'))return;
+  const tx=db.transaction('dailyLogs','readwrite');
+  tx.objectStore('dailyLogs').delete(id);
+  tx.oncomplete=()=>{renderLogList();showToast('Deleted.');};
+}
+function navLogDate(offset){
+  const el=document.getElementById('log-view-date');
+  if(offset===0){el.value=TODAY;}
+  else{const p=el.value||TODAY;const d=new Date(p+'T00:00:00');d.setDate(d.getDate()+offset);el.value=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+  renderLogList();
+}
+function renderLogList(){
+  const date=document.getElementById('log-view-date').value;
+  if(!db){return;}
+  db.transaction('dailyLogs').objectStore('dailyLogs').getAll().onsuccess=e=>{
+    const rows=e.target.result.filter(r=>r.date===date).sort((a,b)=>(a.startTime||'').localeCompare(b.startTime||''));
+    const box=document.getElementById('log-list');
+    if(!rows.length){box.innerHTML='<div class="empty-state"><div class="es-icon">&#x1F4DD;</div><p>No sessions logged for '+escH(date)+'</p></div>';return;}
+    let tot=0,cor=0,wrg=0;rows.forEach(r=>{tot+=(r.total||0);cor+=(r.correct||0);wrg+=(r.wrong||0);});
+    const acc=tot?Math.round(cor/tot*100):0;
+    let html=`<div class="metric-row">
+      <div class="metric-box"><div class="num">${rows.length}</div><div class="lbl">Sessions</div></div>
+      <div class="metric-box"><div class="num">${tot}</div><div class="lbl">Questions</div></div>
+      <div class="metric-box ${acc>=70?'green':acc>=40?'orange':'red'}"><div class="num">${acc}%</div><div class="lbl">Accuracy</div></div>
+    </div>`;
+    html+='<table><thead><tr><th>Time</th><th>Subject / Chapter</th><th>Activity</th><th>Q/C/W</th><th>Action</th></tr></thead><tbody>';
+    rows.forEach(r=>{
+      const acc2=r.total?Math.round(r.correct/r.total*100):null;
+      html+=`<tr>
+        <td style="font-family:monospace;white-space:nowrap">${escH(r.startTime||'—')} &ndash; ${escH(r.endTime||'—')}</td>
+        <td><b>${escH(r.subject)}</b><br><small style="color:#777">${escH(r.chapter)} &rsaquo; ${escH(r.topic)}</small></td>
+        <td><span class="tag">${escH(r.activity)}</span></td>
+        <td>${r.total||0} / <span style="color:#28a745">${r.correct||0}</span> / <span style="color:#e74c3c">${r.wrong||0}</span>${acc2!==null?' <small>('+acc2+'%)</small>':''}</td>
+        <td><button class="btn-sec btn-sm" onclick="editLog(${r.id})">Edit</button> <button class="btn-sec btn-sm" style="color:#e74c3c" onclick="deleteLog(${r.id})">Del</button></td>
+      </tr>`;
+    });
+    html+='</tbody></table>';
+    box.innerHTML=html;
+  };
+}
+
+// ── PLAN BUILDER ──────────────────────────────────────────────────────────────
+function onPlanDateChange(){
+  const d=document.getElementById('plan-date').value;
+  document.getElementById('plan-date-label').textContent=d||'—';
+  db.transaction('dailyPlans').objectStore('dailyPlans').get(d).onsuccess=e=>{
+    _stageTasks=(e.target.result&&e.target.result.tasks)||[];
+    _planDirty=false;
+    renderStagedTasks();
+  };
+}
+function navPlanDate(offset){
+  const el=document.getElementById('plan-date');
+  if(offset===0){el.value=TODAY;}
+  else{const p=el.value||TODAY;const d=new Date(p+'T00:00:00');d.setDate(d.getDate()+offset);el.value=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+  onPlanDateChange();
+}
+function addPlanTask(){
+  const t={
+    startTime:document.getElementById('pt-start').value,
+    endTime:document.getElementById('pt-end').value,
+    subject:document.getElementById('pt-subject').value,
+    activity:document.getElementById('pt-activity').value,
+    chapter:document.getElementById('pt-chapter').value.trim(),
+    topic:document.getElementById('pt-topic').value.trim(),
+    totalQs:+document.getElementById('pt-total').value||0,
+    correctQs:+document.getElementById('pt-correct').value||0,
+    wrongQs:+document.getElementById('pt-wrong').value||0
+  };
+  if(!t.chapter||!t.topic){showToast('Enter chapter and topic.',true);return;}
+  if(_editTaskIdx!==null){_stageTasks[_editTaskIdx]=t;_editTaskIdx=null;}
+  else _stageTasks.push(t);
+  _planDirty=true;
+  document.getElementById('pt-chapter').value='';
+  document.getElementById('pt-topic').value='';
+  ['pt-total','pt-correct','pt-wrong'].forEach(i=>document.getElementById(i).value=0);
+  document.getElementById('task-form-title').textContent='Add Task to Plan';
+  document.getElementById('pt-add-btn').textContent='+ Add Task';
+  renderStagedTasks();
+}
+function cancelTaskEdit(){
+  _editTaskIdx=null;
+  document.getElementById('pt-chapter').value='';
+  document.getElementById('pt-topic').value='';
+  ['pt-total','pt-correct','pt-wrong'].forEach(i=>document.getElementById(i).value=0);
+  document.getElementById('task-form-title').textContent='Add Task to Plan';
+  document.getElementById('pt-add-btn').textContent='+ Add Task';
+}
+function editPlanTask(i){
+  _editTaskIdx=i;const t=_stageTasks[i];
+  document.getElementById('pt-start').value=t.startTime;
+  document.getElementById('pt-end').value=t.endTime;
+  document.getElementById('pt-subject').value=t.subject;
+  document.getElementById('pt-activity').value=t.activity;
+  document.getElementById('pt-chapter').value=t.chapter;
+  document.getElementById('pt-topic').value=t.topic;
+  document.getElementById('pt-total').value=t.totalQs||0;
+  document.getElementById('pt-correct').value=t.correctQs||0;
+  document.getElementById('pt-wrong').value=t.wrongQs||0;
+  document.getElementById('task-form-title').textContent='&#x26A0; Editing Task';
+  document.getElementById('pt-add-btn').textContent='Update Task';
+}
+function removePlanTask(i){_stageTasks.splice(i,1);_planDirty=true;renderStagedTasks();}
+function renderStagedTasks(){
+  const box=document.getElementById('staged-tasks');
+  if(!_stageTasks.length){box.innerHTML='<div class="empty-state"><div class="es-icon">&#x1F4CB;</div><p>No tasks staged yet. Add tasks on the left.</p></div>';return;}
+  const sorted=[..._stageTasks].sort((a,b)=>(a.startTime||'').localeCompare(b.startTime||''));
+  let html='';
+  sorted.forEach((t,i)=>{
+    const orig=_stageTasks.indexOf(t);
+    const qs=t.totalQs>0?` <span style="color:#2f6fed;font-size:12px">[${t.totalQs}Q, C:${t.correctQs}/W:${t.wrongQs}]</span>`:'';
+    html+=`<div class="plan-task-row">
+      <div class="pt-info"><span class="pt-time">${escH(t.startTime)}–${escH(t.endTime)}</span> <span class="tag">${escH(t.subject)}</span><span class="tag tag-orange">${escH(t.activity)}</span><br><small>${escH(t.chapter)} &rsaquo; ${escH(t.topic)}</small>${qs}</div>
+      <div class="pt-actions">
+        <button class="btn-sec btn-sm" onclick="editPlanTask(${orig})">Edit</button>
+        <button class="btn-sec btn-sm" style="color:#e74c3c" onclick="removePlanTask(${orig})">&#x2715;</button>
+      </div>
+    </div>`;
+  });
+  box.innerHTML=html;
+}
+function savePlan(){
+  if(!_stageTasks.length){showToast('No tasks to save.',true);return;}
+  const date=document.getElementById('plan-date').value;
+  // dailyPlans uses 'date' keyPath — need its own DB setup
+  // Since we reuse StudyCompanionDB which has dailyLogs (autoIncrement), dailyPlans needs special handling
+  // We store as dailyLogs with type='plan' OR use a separate store. Use separate store if available, else localStorage fallback.
+  const planObj={date:date,tasks:_stageTasks};
+  // Try put into dailyPlans store (keyPath=date); if store not available fallback to localStorage
+  try{
+    const tx=db.transaction('dailyPlans','readwrite');
+    tx.objectStore('dailyPlans').put(planObj);
+    tx.oncomplete=()=>{_planDirty=false;showToast('Plan saved for '+date+'!');};
+    tx.onerror=()=>savePlanFallback(date,planObj);
+  }catch(e){savePlanFallback(date,planObj);}
+}
+function savePlanFallback(date,obj){
+  localStorage.setItem('dp_plan_'+date,JSON.stringify(obj));
+  _planDirty=false;showToast('Plan saved (local)!');
+}
+function getPlan(date,cb){
+  try{
+    db.transaction('dailyPlans').objectStore('dailyPlans').get(date).onsuccess=e=>{
+      if(e.target.result){cb(e.target.result);}
+      else{const raw=localStorage.getItem('dp_plan_'+date);cb(raw?JSON.parse(raw):null);}
+    };
+  }catch(er){const raw=localStorage.getItem('dp_plan_'+date);cb(raw?JSON.parse(raw):null);}
+}
+function clearPlan(){if(!confirm('Clear all staged tasks?'))return;_stageTasks=[];_planDirty=true;renderStagedTasks();}
+function clonePlan(){
+  const src=document.getElementById('clone-source').value;
+  const tgt=document.getElementById('plan-date').value;
+  if(!src){showToast('Select a source date.',true);return;}
+  if(src===tgt){showToast('Source and target must differ.',true);return;}
+  getPlan(src,plan=>{
+    if(!plan||!plan.tasks||!plan.tasks.length){showToast('No plan found for '+src,true);return;}
+    if(!confirm('Copy '+plan.tasks.length+' tasks from '+src+' to '+tgt+'?'))return;
+    _stageTasks=JSON.parse(JSON.stringify(plan.tasks));
+    _planDirty=true;
+    renderStagedTasks();
+    showToast('Cloned '+plan.tasks.length+' tasks. Save when ready.');
+  });
+}
+
+// ── PLAN VS ACTUAL COMPARISON ─────────────────────────────────────────────────
+function navCmpDate(offset){
+  const el=document.getElementById('cmp-date');
+  if(offset===0){el.value=TODAY;}
+  else{const p=el.value||TODAY;const d=new Date(p+'T00:00:00');d.setDate(d.getDate()+offset);el.value=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+  runComparison();
+}
+function runComparison(){
+  const date=document.getElementById('cmp-date').value;
+  const out=document.getElementById('cmp-output');
+  if(!db){out.innerHTML='<div class="empty-state"><p>Loading…</p></div>';return;}
+  getPlan(date,plan=>{
+    const planned=(plan&&plan.tasks)||[];
+    db.transaction('dailyLogs').objectStore('dailyLogs').getAll().onsuccess=ev=>{
+      const actuals=ev.target.result.filter(r=>r.date===date);
+      buildComparison(date,planned,actuals,out);
+    };
+  });
+}
+
+function minsFromSlot(start,end){
+  if(!start||!end)return 0;
+  const toM=s=>{const p=s.split(':');return +p[0]*60+(+p[1]||0);};
+  return Math.max(0,toM(end)-toM(start));
+}
+
+function buildComparison(date,planned,actuals,out){
+  if(!planned.length&&!actuals.length){
+    out.innerHTML='<div class="empty-state"><div class="es-icon">&#x1F4C5;</div><p>No plan or sessions found for <b>'+escH(date)+'</b>.<br>Build a plan in the <b>Plan Builder</b> tab and log sessions in the <b>Daily Study Log</b> tab.</p></div>';
+    return;
+  }
+
+  // ── Totals ────────────────────────────────────────────────────────────────
+  const planMins=planned.reduce((s,t)=>s+minsFromSlot(t.startTime,t.endTime),0);
+  const planQs=planned.reduce((s,t)=>s+(t.totalQs||0),0);
+  const planCor=planned.reduce((s,t)=>s+(t.correctQs||0),0);
+  const planAcc=planQs?Math.round(planCor/planQs*100):null;
+
+  const actMins=actuals.reduce((s,t)=>s+minsFromSlot(t.startTime,t.endTime),0);
+  const actQs=actuals.reduce((s,t)=>s+(t.total||0),0);
+  const actCor=actuals.reduce((s,t)=>s+(t.correct||0),0);
+  const actAcc=actQs?Math.round(actCor/actQs*100):null;
+
+  // ── Task matching ────────────────────────────────────────────────────────
+  // Match planned task to actual by subject + chapter (fuzzy: toLower contains)
+  const usedActuals=new Set();
+  const matched=planned.map(pt=>{
+    const pSub=(pt.subject||'').toLowerCase();
+    const pChap=(pt.chapter||'').toLowerCase();
+    const pAct=(pt.activity||'').toLowerCase();
+    // find best actual match: same subject, chapter contains or equals, activity matches preferred
+    let best=null,bestScore=0;
+    actuals.forEach((a,idx)=>{
+      if(usedActuals.has(idx))return;
+      const aSub=(a.subject||'').toLowerCase();
+      const aChap=(a.chapter||'').toLowerCase();
+      const aAct=(a.activity||'').toLowerCase();
+      let score=0;
+      if(aSub===pSub)score+=3;
+      if(aChap===pChap||aChap.includes(pChap)||pChap.includes(aChap))score+=3;
+      if(aAct===pAct)score+=2;
+      if(score>=3&&score>bestScore){bestScore=score;best=idx;}
+    });
+    let actual=null,status='missed';
+    if(best!==null){
+      usedActuals.add(best);actual=actuals[best];
+      // Partial: qs done < 60% of planned, or time < 60% of planned
+      const qRatio=pt.totalQs>0?(actual.total||0)/pt.totalQs:1;
+      const tRatio=planMins>0?minsFromSlot(actual.startTime,actual.endTime)/Math.max(1,minsFromSlot(pt.startTime,pt.endTime)):1;
+      status=(qRatio<0.6||tRatio<0.6)?'partial':'done';
+    }
+    return{pt,actual,status};
+  });
+
+  const bonusActuals=actuals.filter((_,i)=>!usedActuals.has(i));
+  const doneCount=matched.filter(m=>m.status==='done').length;
+  const partialCount=matched.filter(m=>m.status==='partial').length;
+  const missedCount=matched.filter(m=>m.status==='missed').length;
+  const compRate=planned.length?Math.round((doneCount+partialCount*0.5)/planned.length*100):0;
+
+  // ── Subject coverage ──────────────────────────────────────────────────────
+  const subjPlan={},subjDone={};
+  planned.forEach(t=>{const s=t.subject||'?';subjPlan[s]=(subjPlan[s]||0)+1;});
+  matched.filter(m=>m.status!=='missed').forEach(m=>{const s=m.pt.subject||'?';subjDone[s]=(subjDone[s]||0)+1;});
+
+  // ── Build HTML ────────────────────────────────────────────────────────────
+  const timeDeviPct=planMins?Math.round((actMins-planMins)/planMins*100):null;
+  const qDeviPct=planQs?Math.round((actQs-planQs)/planQs*100):null;
+  const accGap=planAcc!==null&&actAcc!==null?actAcc-planAcc:null;
+
+  const deviBadge=(pct,unit)=>{
+    if(pct===null)return '<span style="color:#aaa">—</span>';
+    const col=pct>=0?'#28a745':'#e74c3c';
+    return `<span style="color:${col};font-weight:700">${pct>=0?'+':''}${pct}${unit}</span>`;
+  };
+
+  let html=`<div class="section-title">Summary for <span style="font-family:monospace">${escH(date)}</span></div>`;
+
+  // Metric row
+  const crCol=compRate>=70?'green':compRate>=50?'orange':'red';
+  html+=`<div class="metric-row">
+    <div class="metric-box ${crCol}"><div class="num">${compRate}%</div><div class="lbl">Completion Rate</div></div>
+    <div class="metric-box"><div class="num">${doneCount}<span style="font-size:14px">/${planned.length}</span></div><div class="lbl">Tasks Done</div></div>
+    <div class="metric-box orange"><div class="num">${partialCount}</div><div class="lbl">Partial</div></div>
+    <div class="metric-box red"><div class="num">${missedCount}</div><div class="lbl">Missed</div></div>
+  </div>`;
+
+  // Plan vs Actual totals table
+  html+=`<div class="grid2" style="margin-bottom:18px">
+  <div class="card" style="padding:14px">
+    <h3>Time &amp; Questions</h3>
+    <table><thead><tr><th>Metric</th><th>Planned</th><th>Actual</th><th>Deviation</th></tr></thead><tbody>
+    <tr><td>Study Time</td><td>${planMins} min</td><td>${actMins} min</td><td>${deviBadge(timeDeviPct,'%')}</td></tr>
+    <tr><td>Questions</td><td>${planQs}</td><td>${actQs}</td><td>${deviBadge(qDeviPct,'%')}</td></tr>
+    <tr><td>Accuracy Target</td><td>${planAcc!==null?planAcc+'%':'—'}</td><td>${actAcc!==null?actAcc+'%':'—'}</td><td>${deviBadge(accGap,'pp')}</td></tr>
+    </tbody></table>
+  </div>
+  <div class="card" style="padding:14px">
+    <h3>Subject Coverage</h3>
+    <div class="bar-chart" style="margin-top:6px">`;
+  Object.entries(subjPlan).sort((a,b)=>b[1]-a[1]).forEach(([s,total])=>{
+    const done=subjDone[s]||0;const pct=Math.round(done/total*100);
+    const col=pct>=70?'#28a745':pct>=50?'#e67e22':'#e74c3c';
+    html+=`<div class="bar-row"><div class="bar-label">${escH(s)}</div><div class="bar-bg"><div class="bar-fill" style="width:${Math.max(pct,2)}%;background:${col}"></div></div><div class="bar-val">${done}/${total}</div></div>`;
+  });
+  html+=`</div></div></div>`;
+
+  // Task-level breakdown
+  html+=`<div class="section-title">Task-by-Task Breakdown (${planned.length} planned)</div>`;
+  if(!planned.length){html+='<p style="color:#aaa;font-size:13px">No plan found for this date. Add one in the Plan Builder tab.</p>';}
+  else{
+    matched.sort((a,b)=>(a.pt.startTime||'').localeCompare(b.pt.startTime||'')).forEach(m=>{
+      const p=m.pt;const a=m.actual;
+      const icon=m.status==='done'?'&#x2705;':m.status==='partial'?'&#x26A1;':'&#x274C;';
+      const bclass=m.status==='done'?'b-done':m.status==='partial'?'b-partial':'b-missed';
+      const cclass=m.status==='done'?'cmp-plan':m.status==='partial'?'cmp-plan':' cmp-missed';
+      let pInfo=`<div style="font-size:13px">
+        <span class="badge ${bclass}">${icon} ${m.status.charAt(0).toUpperCase()+m.status.slice(1)}</span>
+        <span style="font-family:monospace;margin-left:6px">${escH(p.startTime||'?')}–${escH(p.endTime||'?')}</span>
+        <b style="margin-left:8px">${escH(p.subject)}</b> <span class="tag">${escH(p.activity)}</span><br>
+        <small style="color:#777">${escH(p.chapter)} &rsaquo; ${escH(p.topic)}</small>
+        ${p.totalQs?`<span style="color:#2f6fed;font-size:12px;margin-left:6px">Target: ${p.totalQs}Q (C:${p.correctQs}/W:${p.wrongQs})</span>`:''}
+      </div>`;
+      if(a){
+        const aAcc=a.total?Math.round(a.correct/a.total*100):null;
+        const qDev=p.totalQs?Math.round(((a.total||0)-p.totalQs)/p.totalQs*100):null;
+        pInfo+=`<div class="cmp-actual" style="margin-top:6px;font-size:12px">
+          &#x26A1; <b>Actual:</b> ${escH(a.startTime||'?')}–${escH(a.endTime||'?')} &nbsp;|&nbsp;
+          ${a.total||0}Q done <span style="color:#28a745">${a.correct||0}C</span>/<span style="color:#e74c3c">${a.wrong||0}W</span>
+          ${aAcc!==null?`&nbsp;(${aAcc}% accuracy)`:''} 
+          ${qDev!==null?`<span style="color:${qDev>=0?'#28a745':'#e74c3c'};margin-left:4px">${qDev>=0?'+':''}${qDev}% vs target</span>`:''}
+        </div>`;
+      }
+      html+=`<div class="${cclass}" style="margin-bottom:8px">${pInfo}</div>`;
+    });
+  }
+
+  // Bonus sessions
+  if(bonusActuals.length){
+    html+=`<div class="section-title">&#x1F4A1; Bonus Sessions (${bonusActuals.length} unplanned)</div>`;
+    bonusActuals.forEach(a=>{
+      html+=`<div class="cmp-extra">
+        <span class="badge b-extra">Extra</span>
+        <span style="font-family:monospace;margin-left:6px">${escH(a.startTime||'?')}–${escH(a.endTime||'?')}</span>
+        <b style="margin-left:6px">${escH(a.subject)}</b> <span class="tag">${escH(a.activity)}</span><br>
+        <small style="color:#777">${escH(a.chapter)} &rsaquo; ${escH(a.topic)}</small>
+        &nbsp;${a.total||0}Q / <span style="color:#28a745">${a.correct||0}C</span>/<span style="color:#e74c3c">${a.wrong||0}W</span>
+      </div>`;
+    });
+  }
+
+  // Insight
+  if(planned.length){
+    html+=`<div class="card" style="margin-top:18px;padding:16px;background:#f7f9ff;border-left:4px solid #2f6fed">
+      <b style="color:#2f6fed">&#x1F4A1; Insight for ${escH(date)}</b><br>
+      <span style="font-size:13px;color:#555">`;
+    if(compRate>=80)html+='&#x1F3C6; Excellent execution! You completed 80%+ of your plan. Keep this consistency.';
+    else if(compRate>=60)html+='&#x1F44D; Good effort. A few tasks were missed or partial. Review missed tasks and reschedule them.';
+    else if(compRate>=40)html+='&#x26A0;&#xFE0F; Only '+compRate+'% completed. Consider reducing the number of planned tasks or checking for distractions.';
+    else html+='&#x274C; Less than 40% of the plan was executed. Either the plan was too ambitious or the day had significant interruptions. Revise tomorrow\'s plan accordingly.';
+    if(accGap!==null&&accGap<-10)html+=' Accuracy was '+Math.abs(accGap)+'pp below target — focus on understanding over speed.';
+    if(accGap!==null&&accGap>10)html+=' Accuracy exceeded target by '+accGap+'pp — great accuracy!';
+    if(bonusActuals.length>0)html+=' You also did '+bonusActuals.length+' bonus unplanned session(s).';
+    html+=`</span></div>`;
+  }
+
+  out.innerHTML=html;
+}
+
+if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));}
+</script>
+</body>
+</html>

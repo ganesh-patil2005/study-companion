@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><link rel="manifest" href="manifest.json"><meta name="theme-color" content="#2f6fed"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Study Companion"><link rel="apple-touch-icon" href="icon.svg"><title>Study Companion</title>
+<style>
+body{margin:0;font-family:Segoe UI,Arial;background:#eef2f7}
+.header{background:#2f6fed;color:#fff;padding:18px 30px;font-size:28px;font-weight:bold}
+.nav{background:#fff;padding:12px 30px;border-bottom:1px solid #ddd}
+.nav a{margin-right:18px;color:#2f6fed;text-decoration:none;font-weight:600}
+.nav a:hover{text-decoration:underline}
+.container{width:1050px;margin:25px auto}
+.card{background:#fff;padding:22px;border-radius:10px;box-shadow:0 2px 10px rgba(0,0,0,.12)}
+h2{margin:0;color:#2f6fed}
+.quote{margin:10px 0 20px;color:#777;font-style:italic}
+label{display:block;font-weight:600;margin-top:14px}
+input,select,textarea{width:100%;padding:10px;border:1px solid #ccc;border-radius:6px;box-sizing:border-box;font-size:14px;font-family:Segoe UI,Arial}
+textarea{height:90px;resize:vertical}
+input[type=search],input.search-box{margin-top:20px}
+.actions{margin-top:20px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+button{padding:10px 18px;background:#2f6fed;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:14px;font-family:Segoe UI,Arial}
+button:hover{opacity:.88}
+.btn-sec{background:#6c757d}
+.btn-csv{background:#e67e22}
+table{width:100%;margin-top:20px;border-collapse:collapse}
+th{background:#2f6fed;color:#fff}
+th,td{border:1px solid #ddd;padding:10px;text-align:left}
+tr:nth-child(even){background:#f7f9fc}
+.summary{display:flex;gap:15px;margin:20px 0}
+.box{flex:1;background:#f0f5ff;padding:14px;border-radius:8px;text-align:center;font-size:14px}
+.box b{font-size:24px;display:block;color:#2f6fed}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;width:1050px;margin:25px auto 0}
+.stat-card{background:#fff;padding:25px;border-radius:10px;box-shadow:0 2px 10px rgba(0,0,0,.12);text-decoration:none;color:#333;display:block;transition:background .2s}
+.stat-card:hover{background:#eef5ff}
+.stat-card h3{margin:0 0 10px;color:#555;font-weight:600}
+.count{font-size:44px;font-weight:bold;color:#2f6fed}
+.io-bar{width:1050px;margin:16px auto;text-align:right}
+.io-bar button{padding:10px 18px;margin-left:10px;border:none;border-radius:6px;cursor:pointer;font-size:14px;font-family:Segoe UI,Arial}
+.btn-exp{background:#2f6fed;color:#fff}.btn-imp{background:#28a745;color:#fff}
+.today-badge{display:inline-block;background:#e74c3c;color:#fff;font-size:12px;font-weight:700;padding:2px 8px;border-radius:10px;margin-left:6px;vertical-align:middle}
+.backup-banner{width:1050px;margin:18px auto 0;border-radius:10px;padding:14px 20px;display:flex;align-items:center;gap:14px;font-size:14px;box-sizing:border-box}
+.backup-banner.warn{background:#fff8e1;border:1.5px solid #f0b429;color:#7a5800}
+.backup-banner.danger{background:#fff0f0;border:1.5px solid #e74c3c;color:#7a0000}
+.backup-banner.ok{background:#edfaf1;border:1.5px solid #28a745;color:#1a5c2a}
+.backup-banner .bb-icon{font-size:22px;flex-shrink:0}
+.backup-banner .bb-text{flex:1;line-height:1.5}
+.backup-banner .bb-text b{display:block;font-size:15px;margin-bottom:2px}
+.backup-banner .bb-btn{padding:8px 18px;border:none;border-radius:6px;cursor:pointer;font-size:13px;font-weight:700;white-space:nowrap;font-family:Segoe UI,Arial}
+.backup-banner.warn .bb-btn{background:#f0b429;color:#fff}
+.backup-banner.danger .bb-btn{background:#e74c3c;color:#fff}
+.backup-banner.ok .bb-btn{background:#28a745;color:#fff}
+.stat-card.has-today{border:2px solid #e74c3c;box-shadow:0 0 0 3px rgba(231,76,60,.15)}
+.today-list{font-size:13px;color:#555;margin-top:8px;line-height:1.7}
+.toast{position:fixed;top:20px;right:20px;background:#28a745;color:#fff;padding:12px 22px;border-radius:8px;font-size:15px;font-weight:600;z-index:9999;box-shadow:0 3px 14px rgba(0,0,0,.25);display:none;animation:fadeIn .3s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}
+.help-btn{margin-left:auto;padding:6px 16px;background:#f0f5ff;color:#2f6fed;border:1px solid #b8caf5;border-radius:14px;cursor:pointer;font-size:13px;font-weight:700;font-family:Segoe UI,Arial;display:inline-flex;align-items:center;gap:4px}
+.help-btn:hover{background:#2f6fed;color:#fff}
+.help-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:10000;justify-content:center;align-items:flex-start;padding-top:40px}
+.help-overlay.open{display:flex}
+.help-modal{background:#fff;border-radius:12px;width:760px;max-height:82vh;overflow-y:auto;box-shadow:0 8px 40px rgba(0,0,0,.3);display:flex;flex-direction:column}
+.help-modal-head{background:#2f6fed;color:#fff;padding:16px 22px;border-radius:12px 12px 0 0;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:2}
+.help-modal-head h3{margin:0;font-size:17px}
+.help-tabs{display:flex;gap:0;border-bottom:2px solid #dde4f5;padding:0 22px;background:#f7f9ff;position:sticky;top:54px;z-index:1}
+.help-tab{padding:10px 18px;cursor:pointer;font-size:14px;font-weight:600;color:#666;border:none;background:none;border-bottom:3px solid transparent;margin-bottom:-2px;font-family:Segoe UI,Arial}
+.help-tab.active{color:#2f6fed;border-bottom-color:#2f6fed}
+.help-tab:hover:not(.active){color:#2f6fed;background:#eef2ff}
+.help-body{padding:22px 26px;font-size:14px;line-height:1.75;color:#333}
+.help-body h4{color:#2f6fed;margin:18px 0 6px;font-size:15px;border-bottom:1px solid #e5eaf5;padding-bottom:4px}
+.help-body h4:first-child{margin-top:0}
+.help-body ul{margin:4px 0 10px 18px;padding:0}
+.help-body li{margin-bottom:5px}
+.help-body .tip{background:#fff8e1;border-left:4px solid #f0b429;padding:10px 14px;border-radius:0 6px 6px 0;margin:12px 0;font-size:13px}
+.help-body .warn{background:#fff0f0;border-left:4px solid #e74c3c;padding:10px 14px;border-radius:0 6px 6px 0;margin:12px 0;font-size:13px}
+.help-body .badge-demo{display:inline-block;padding:2px 10px;border-radius:10px;font-size:12px;font-weight:700;margin:0 3px}
+.badge-demo-p{background:#fff3e0;color:#e67e22}
+.badge-demo-i{background:#e3f2fd;color:#1565c0}
+.badge-demo-c{background:#e8f5e9;color:#2e7d32}
+.help-close{background:none;border:none;color:#fff;font-size:24px;cursor:pointer;line-height:1;padding:0 4px}
+.help-pane{display:none}.help-pane.active{display:block}
+.help-overall-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:10px}
+.help-page-card{background:#f7f9ff;border:1px solid #d5e0f5;border-radius:8px;padding:14px 16px}
+.help-page-card h5{margin:0 0 6px;color:#2f6fed;font-size:14px}
+.help-page-card p{margin:0;font-size:13px;color:#555;line-height:1.5}
+</style></head><body>
+<div class="header">&#x1F4DA; Study Companion</div>
+<div class="nav">
+<a href="index.html">Dashboard</a>
+<a href="learning_book.html">Learning</a>
+<a href="practice_book.html">Practice</a>
+<a href="mistake_book.html">Mistakes</a>
+<a href="formula_book.html">Formula</a>
+<a href="success_journal.html">Journal</a>
+<a href="revision_planner.html">Revision</a>
+<a href="parent_dashboard.html">Parent</a><a href="reports.html" style="color:#e67e22;font-weight:700">&#x1F4CA; Reports</a><a href="daily_planner.html" style="color:#8e44ad;font-weight:700">&#x1F4C5; Planner</a>
+<button class="help-btn" onclick="openHelp()">&#x2753; Help</button>
+</div>
+<div id="backup-banner" class="backup-banner" style="display:none">
+  <span class="bb-icon" id="bb-icon"></span>
+  <span class="bb-text"><b id="bb-title"></b><span id="bb-msg"></span></span>
+  <button class="bb-btn" onclick="exportAll()">&#x2B07; Backup Now</button>
+</div>
+<div class="grid">
+  <a class="stat-card" href="learning_book.html"><h3>&#x1F4D8; Learning Notes</h3><div id="learning" class="count">0</div></a>
+  <a class="stat-card" href="practice_book.html"><h3>&#x270F; Practice Sessions</h3><div id="practice" class="count">0</div></a>
+  <a class="stat-card" href="mistake_book.html"><h3>&#x2B50; Mistakes</h3><div id="mistakes" class="count">0</div></a>
+  <a class="stat-card" href="formula_book.html"><h3>&#x1F4D7; Formulae</h3><div id="formula" class="count">0</div></a>
+  <a class="stat-card" href="success_journal.html"><h3>&#x1F4D9; Journal Entries</h3><div id="journal" class="count">0</div></a>
+  <a class="stat-card" id="rev-card" href="revision_planner.html"><h3>&#x1F501; Revision Plans<span id="today-badge" class="today-badge" style="display:none"></span></h3><div id="revision" class="count">0</div><div id="today-list" class="today-list"></div></a>
+</div>
+<div class="io-bar">
+  <button class="btn-exp" onclick="exportAll()">&#x2B07; Export All Data</button>
+  <button class="btn-imp" onclick="document.getElementById('impFile').click()">&#x2B06; Merge Import</button>
+  <input type="file" id="impFile" accept=".json" style="display:none" onchange="importData(this)">
+  <input type="text" id="device-name" placeholder="Label this device (e.g. Phone, Laptop)" style="flex:1;min-width:160px;max-width:240px;font-size:13px;padding:8px 10px;border:1px solid #ccc;border-radius:6px;font-family:Segoe UI,Arial" oninput="localStorage.setItem('sc_device_name',this.value)">
+</div>
+<div id="import-result" style="display:none;padding:0 4px"></div>
+<div id="toast" class="toast"></div>
+<script>
+let db;
+const req=indexedDB.open('StudyCompanionDB',7);
+req.onupgradeneeded=e=>{
+  const d=e.target.result;
+  ['learning','practice','mistakes','formula','journal','revision','parent','catalog','dailyLogs'].forEach(s=>{
+    if(!d.objectStoreNames.contains(s)) d.createObjectStore(s,{keyPath:'id',autoIncrement:true});
+  });
+  if(!d.objectStoreNames.contains('dailyPlans'))d.createObjectStore('dailyPlans',{keyPath:'date'});
+};
+req.onsuccess=e=>{
+  db=e.target.result;
+  ['learning','practice','mistakes','formula','journal','revision'].forEach(loadCount);
+  loadTodayRevisions();
+  checkBackupReminder();
+  const dn=document.getElementById('device-name');
+  if(dn)dn.value=localStorage.getItem('sc_device_name')||'';
+};
+function loadCount(store){
+  db.transaction(store).objectStore(store).count().onsuccess=e=>{
+    document.getElementById(store).textContent=e.target.result;
+  };
+}
+function loadTodayRevisions(){
+  const today=new Date().toISOString().slice(0,10);
+  const items=[];
+  db.transaction('revision').objectStore('revision').openCursor().onsuccess=e=>{
+    const c=e.target.result;
+    if(c){
+      const v=c.value;
+      if(v.date===today && (v.status||'Pending')!=='Completed') items.push(v);
+      c.continue();
+    }else{
+      const badge=document.getElementById('today-badge');
+      const list=document.getElementById('today-list');
+      const card=document.getElementById('rev-card');
+      if(items.length){
+        badge.textContent=items.length+' today';
+        badge.style.display='inline-block';
+        card.classList.add('has-today');
+        list.innerHTML=items.map(v=>'&#x25CF; '+escH(v.subject||'')+(v.chapter?' &rsaquo; '+escH(v.chapter):'')+' <em>('+escH(v.status||'Pending')+')</em>').join('<br>');
+      }else{
+        badge.style.display='none';
+        card.classList.remove('has-today');
+        list.innerHTML='';
+      }
+    }
+  };
+}
+function escH(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg||'Saved successfully!';
+  t.style.display='block';
+  clearTimeout(t._timer);
+  t._timer=setTimeout(()=>t.style.display='none',2500);
+}
+function exportAll(){
+  const stores=['learning','practice','mistakes','formula','journal','revision','parent','dailyLogs','dailyPlans'];
+  const out={};let done=0;
+  stores.forEach(store=>{
+    if(!db.objectStoreNames.contains(store)){if(++done===stores.length)_doExportDownload(out);return;}
+    out[store]=[];
+    db.transaction(store).objectStore(store).openCursor().onsuccess=e=>{
+      let c=e.target.result;
+      if(c){out[store].push(c.value);c.continue();}
+      else if(++done===stores.length)_doExportDownload(out);
+    };
+  });
+}
+function _doExportDownload(out){
+  const device=(localStorage.getItem('sc_device_name')||'').trim();
+  const label=device?'_'+device.replace(/[^a-zA-Z0-9]/g,'-'):'';
+  const blob=new Blob([JSON.stringify(out,null,2)],{type:'application/json'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download='StudyCompanion'+label+'_'+new Date().toISOString().slice(0,10)+'.json';
+  a.click();URL.revokeObjectURL(a.href);
+  localStorage.setItem('sc_last_export', new Date().toISOString());
+  checkBackupReminder();
+  showToast('Backup downloaded!');
+}
+function checkBackupReminder(){
+  const banner=document.getElementById('backup-banner');
+  const raw=localStorage.getItem('sc_last_export');
+  const icon=document.getElementById('bb-icon');
+  const title=document.getElementById('bb-title');
+  const msg=document.getElementById('bb-msg');
+  if(!raw){
+    banner.className='backup-banner danger';
+    icon.textContent='\u26A0\uFE0F';
+    title.textContent='No backup found!';
+    msg.textContent='You have never exported your data. Click Backup Now to create a safe copy.';
+    banner.style.display='flex';
+    return;
+  }
+  const days=Math.floor((Date.now()-new Date(raw).getTime())/(1000*60*60*24));
+  if(days>=7){
+    banner.className='backup-banner danger';
+    icon.textContent='\u26A0\uFE0F';
+    title.textContent='Backup overdue! Last backup: '+days+' days ago.';
+    msg.textContent='Your data has not been backed up in over a week. Export now to avoid data loss.';
+    banner.style.display='flex';
+  }else if(days>=3){
+    banner.className='backup-banner warn';
+    icon.textContent='\u1F4BE';
+    title.textContent='Backup reminder — last backup '+days+' day'+(days===1?'':'s')+' ago.';
+    msg.textContent='Consider exporting soon to keep your backup up to date.';
+    banner.style.display='flex';
+  }else{
+    const d=new Date(raw);
+    banner.className='backup-banner ok';
+    icon.textContent='\u2705';
+    title.textContent='Data backed up — '+days+' day'+(days===1?'':'s')+' ago.';
+    msg.textContent='Last export: '+d.toLocaleDateString()+' at '+d.toLocaleTimeString()+'. You\'re safe!';
+    banner.style.display='flex';
+  }
+}
+// Fingerprint keys per store — defines what makes two records "the same"
+const MERGE_KEYS={
+  learning:   r=>`${r.subject||''}|${r.chapter||''}|${(r.topic||'').trim().toLowerCase()}`,
+  practice:   r=>`${r.subject||''}|${r.chapter||''}|${r.diff||''}|${r.questions||0}|${r.correct||0}|${r.wrong||0}|${r.withHint||0}|${r.sawSolution||0}`,
+  mistakes:   r=>`${r.subject||''}|${r.chapter||''}|${(r.question||'').slice(0,80)}`,
+  formula:    r=>`${r.subject||''}|${r.chapter||''}|${(r.formula||'').slice(0,60)}`,
+  journal:    r=>`${r.date||''}`,
+  revision:   r=>`${r.date||''}|${r.subject||''}|${r.chapter||''}`,
+  parent:     r=>`${r.date||''}|${(r.observation||'').slice(0,60)}`,
+  catalog:    r=>`${r.subject||''}|${r.chapter||''}`,
+  dailyLogs:  r=>`${r.date||''}|${r.startTime||''}|${r.subject||''}|${r.chapter||''}`,
+  dailyPlans: r=>`${r.date||''}`
+};
+function importData(input){
+  const file=input.files[0];if(!file)return;
+  document.getElementById('import-result').style.display='none';
+  const reader=new FileReader();
+  reader.onload=ev=>{
+    let data;
+    try{data=JSON.parse(ev.target.result);}catch(e){alert('Invalid or corrupted backup file.');input.value='';return;}
+    const stores=Object.keys(data).filter(s=>db.objectStoreNames.contains(s)&&Array.isArray(data[s])&&data[s].length);
+    if(!stores.length){showToast('Nothing to import.');input.value='';return;}
+    if(!confirm('Merge backup into this device?\n\nOnly NEW records not already present here will be added. Your existing data is never deleted or overwritten.\n\nProceed?')){input.value='';return;}
+    let pending=stores.length;
+    const summary=[];
+    stores.forEach(store=>{
+      const incoming=data[store];
+      const keyFn=MERGE_KEYS[store];
+      const isDailyPlans=store==='dailyPlans';
+      db.transaction(store,'readonly').objectStore(store).getAll().onsuccess=e=>{
+        const seen=new Set();
+        if(keyFn)e.target.result.forEach(r=>seen.add(keyFn(r)));
+        const toAdd=keyFn?incoming.filter(r=>!seen.has(keyFn(r))):incoming;
+        const skipped=incoming.length-toAdd.length;
+        if(!toAdd.length){
+          summary.push({store,added:0,skipped});
+          if(--pending===0)finishImport(summary);
+          return;
+        }
+        const tx=db.transaction(store,'readwrite');
+        const os=tx.objectStore(store);
+        toAdd.forEach(rec=>{
+          const r=Object.assign({},rec);
+          if(!isDailyPlans)delete r.id;
+          isDailyPlans?os.put(r):os.add(r);
+        });
+        tx.oncomplete=()=>{
+          summary.push({store,added:toAdd.length,skipped});
+          if(['learning','practice','mistakes','formula','journal','revision'].includes(store))loadCount(store);
+          if(--pending===0)finishImport(summary);
+        };
+        tx.onerror=()=>{
+          summary.push({store,added:0,skipped,error:true});
+          if(--pending===0)finishImport(summary);
+        };
+      };
+    });
+    input.value='';
+  };
+  reader.readAsText(file);
+}
+function finishImport(summary){
+  const totalAdded=summary.reduce((s,r)=>s+(r.added||0),0);
+  const totalSkipped=summary.reduce((s,r)=>s+(r.skipped||0),0);
+  const names={learning:'Learning',practice:'Practice',mistakes:'Mistakes',formula:'Formula',journal:'Journal',revision:'Revision',parent:'Parent',dailyLogs:'Daily Logs',dailyPlans:'Daily Plans',catalog:'Catalog'};
+  const rows=summary.filter(r=>r.added>0||r.skipped>0).map(r=>`<tr><td style="padding:4px 10px">${names[r.store]||r.store}</td><td style="padding:4px 10px;color:#28a745;font-weight:700">+${r.added} added</td><td style="padding:4px 10px;color:#888">${r.skipped} skipped</td>${r.error?'<td style="color:#e74c3c">error</td>':''}</tr>`).join('');
+  const el=document.getElementById('import-result');
+  el.innerHTML=`<div style="background:#edfaf1;border:1px solid #b2dfdb;border-radius:8px;padding:14px 16px;margin-top:8px;font-size:13px">
+    <b style="color:#28a745">&#x2705; Merge complete!</b> &nbsp; <b>${totalAdded}</b> new records added &bull; <b>${totalSkipped}</b> duplicates skipped
+    ${rows?`<table style="margin-top:10px;width:auto;border-collapse:collapse;border:1px solid #c8e6c9;border-radius:6px"><thead><tr style="background:#f0f9f5"><th style="padding:5px 10px;text-align:left;font-size:12px">Section</th><th style="padding:5px 10px;text-align:left;font-size:12px">Added</th><th style="padding:5px 10px;text-align:left;font-size:12px">Skipped</th></tr></thead><tbody>${rows}</tbody></table>`:''}
+  </div>`;
+  el.style.display='block';
+  showToast(totalAdded>0?'Merge done! +'+totalAdded+' new records.':'All records already exist — nothing added.');
+}
+function openHelp(){document.getElementById('help-overlay').classList.add('open');document.body.style.overflow='hidden';}
+function closeHelp(){document.getElementById('help-overlay').classList.remove('open');document.body.style.overflow='';}
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeHelp();});
+function showHelpPane(id,btn){
+  document.querySelectorAll('.help-pane').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.help-tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('hp-'+id).classList.add('active');
+  if(btn)btn.classList.add('active');
+}
+</script>
+<!-- Help Modal -->
+<div id="help-overlay" class="help-overlay" onclick="if(event.target===this)closeHelp()">
+  <div class="help-modal">
+    <div class="help-modal-head">
+      <h3>&#x2753; Help &amp; Guide</h3>
+      <button class="help-close" onclick="closeHelp()">&#x00D7;</button>
+    </div>
+    <div class="help-tabs">
+      <button class="help-tab active" onclick="showHelpPane('page',this)">&#x1F4C4; Dashboard</button>
+      <button class="help-tab" onclick="showHelpPane('overall',this)">&#x1F4DA; Full App Guide</button>
+    </div>
+    <div class="help-body">
+      <div id="hp-page" class="help-pane active">
+        <h4>Dashboard Overview</h4>
+        <p>The Dashboard shows a live count of records in each section. Click any card to open that section.</p>
+        <h4>Today&rsquo;s Revisions Alert</h4>
+        <ul>
+          <li>The <b>Revision Plans</b> card shows a red badge if you have revisions scheduled for today that are not yet Completed.</li>
+          <li>The subjects and chapters due today are listed inside the card.</li>
+        </ul>
+        <h4>Export All Data</h4>
+        <ul>
+          <li>Click <b>Export All Data</b> to download a complete JSON backup of every section including Daily Planner data.</li>
+          <li>Type a <b>device name</b> (e.g. &ldquo;Phone&rdquo; or &ldquo;Laptop&rdquo;) in the label box next to the button &mdash; the filename becomes <code>StudyCompanion_Phone_2026-07-19.json</code> so you know which device it came from.</li>
+        </ul>
+        <h4>Merge Import (multi-device sync)</h4>
+        <ul>
+          <li>Click <b>Merge Import</b> and select a JSON file exported from <em>another</em> device.</li>
+          <li>Only records <b>not already present</b> on this device are added. Duplicates are detected automatically and skipped.</li>
+          <li>A section-by-section summary shows how many records were added vs skipped.</li>
+          <li>Your existing data is <b>never deleted or overwritten</b> during a merge.</li>
+        </ul>
+  <div class="warn"><b>Tip for multi-device use:</b> Export from Device A &rarr; send the JSON file via WhatsApp / Google Drive / email to Device B &rarr; open the app on Device B &rarr; click Merge Import. Repeat in reverse to bring Device B&rsquo;s new data to Device A.</div>
+      </div>
+      <div id="hp-overall" class="help-pane">
+        <h4>What is Study Companion?</h4>
+        <p>A complete offline JEE/NEET study management app. All data is stored locally in your browser &mdash; no internet, no login, no cloud.</p>
+        <div class="warn"><b>Important:</b> Always use the <b>same browser on the same device</b>. Clearing browser data will delete all records. Use the <b>Export</b> button on the Dashboard regularly.</div>
+        <h4>Pages at a Glance</h4>
+        <div class="help-overall-grid">
+          <div class="help-page-card"><h5>&#x1F4D8; Learning Book</h5><p>Record concepts, theories and key notes topic-wise. Your personal textbook.</p></div>
+          <div class="help-page-card"><h5>&#x270F; Practice Book</h5><p>Log every practice session &mdash; questions, accuracy, time and remarks per chapter.</p></div>
+          <div class="help-page-card"><h5>&#x2B50; Mistake Book</h5><p>Track every mistake with wrong thinking vs correct concept. Review before exams.</p></div>
+          <div class="help-page-card"><h5>&#x1F4D7; Formula Book</h5><p>Build your own formula sheet with memory tricks. Use the symbol toolbar to insert math symbols.</p></div>
+          <div class="help-page-card"><h5>&#x1F4D9; Success Journal</h5><p>Daily reflection &mdash; achievements, challenges, goals. Builds consistency and motivation.</p></div>
+          <div class="help-page-card"><h5>&#x1F501; Revision Planner</h5><p>Schedule and track revision sessions. Dashboard alerts you of today&rsquo;s pending revisions.</p></div>
+          <div class="help-page-card"><h5>&#x1F4CA; Dashboard</h5><p>Overview of all records, today&rsquo;s revision alert, and backup (Export/Import).</p></div>
+          <div class="help-page-card"><h5>&#x1F468; Parent Dashboard</h5><p>Parents log daily observations, encouragement and study discussion notes.</p></div>
+        </div>
+        <h4>Subject &amp; Chapter Dropdowns</h4>
+        <ul>
+          <li>Pre-loaded with the full JEE/NEET syllabus for Physics, Chemistry, Mathematics and Biology.</li>
+          <li>Select <b>&ldquo;+ Add New Subject&hellip;&rdquo;</b> or <b>&ldquo;+ Add New Chapter&hellip;&rdquo;</b> to add custom entries &mdash; they are saved permanently.</li>
+          <li>Topics use a free-text field with autocomplete suggestions.</li>
+        </ul>
+        <h4>Backup &amp; Restore</h4>
+        <ul>
+          <li><b>Export All Data</b> (Dashboard) &rarr; saves a JSON file with all records from every section. Enter a device label first so the filename identifies the source device.</li>
+          <li><b>Export CSV</b> (on each page) &rarr; opens in Excel / Google Sheets.</li>
+          <li><b>Merge Import</b> (Dashboard) &rarr; select a JSON exported from another device. Only NEW records are added; duplicates automatically skipped. Shows a summary of what was merged.</li>
+        </ul>
+        <div class="tip"><b>Tip:</b> Export your data every week. Store the backup file in Google Drive or email it to yourself.</div>
+      </div>
+    </div>
+  </div>
+</div>
+<script>if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').then(()=>console.log('SW registered')).catch(e=>console.warn('SW error',e)));}</script>
+</body></html>

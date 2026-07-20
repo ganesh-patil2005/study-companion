@@ -1,0 +1,2009 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JEE Study Tracker & Planner</title>
+    <style>
+        :root {
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --text-color: #1e293b;
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --success: #16a34a;
+            --success-light: #dcfce7;
+            --danger: #dc2626;
+            --danger-light: #fee2e2;
+            --border: #e2e8f0;
+            --warning: #d97706;
+            --warning-light: #fef3c7;
+            --secondary: #64748b;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1250px;
+            margin: 0 auto;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 15px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        h1, h2, h3 { margin: 0; }
+        
+        .tabs {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .tab-btn {
+            padding: 10px 16px;
+            border: 1px solid var(--border);
+            background: var(--card-bg);
+            cursor: pointer;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: all 0.2s ease;
+        }
+
+        .tab-btn:hover {
+            background: #f1f5f9;
+        }
+
+        .tab-btn.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .panel { display: none; }
+        .panel.active { display: block; }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1.5fr;
+            gap: 20px;
+        }
+
+        @media (max-width: 900px) {
+            .grid { grid-template-columns: 1fr !important; }
+        }
+
+        .card {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            border: 1px solid var(--border);
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-family: inherit;
+        }
+
+        button.btn-submit {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            width: 100%;
+            font-weight: 600;
+            transition: background 0.2s;
+        }
+        button.btn-submit:hover {
+            background: var(--primary-hover);
+        }
+
+        .counter-container {
+            background: #f8fafc;
+            padding: 12px;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            margin-bottom: 15px;
+        }
+
+        .counter-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 5px;
+        }
+
+        .counter-btn {
+            width: 40px;
+            height: 36px;
+            border: 1px solid var(--border);
+            background: #ffffff;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1.1rem;
+            border-radius: 4px;
+        }
+        .counter-btn:hover { background: #e2e8f0; }
+
+        .counter-val {
+            font-weight: bold;
+            width: 60px;
+            text-align: center;
+            font-size: 1.1rem;
+        }
+
+        .step-selector {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            margin-bottom: 12px;
+            font-size: 0.85rem;
+            color: #475569;
+        }
+        .step-selector select { width: auto; padding: 4px 8px; }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        th, td {
+            text-align: left;
+            padding: 10px;
+            border-bottom: 1px solid var(--border);
+            font-size: 0.9rem;
+        }
+
+        th { background-color: #f1f5f9; }
+
+        .badge {
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: bold;
+        }
+        .badge.success { background: var(--success-light); color: var(--success); }
+        .badge.danger { background: var(--danger-light); color: var(--danger); }
+        .badge.info { background: #e0f2fe; color: var(--primary); }
+        .badge.warning { background: var(--warning-light); color: var(--warning); }
+
+        .btn-action {
+            padding: 4px 8px;
+            font-size: 0.75rem;
+            border-radius: 4px;
+            cursor: pointer;
+            border: 1px solid var(--border);
+            background: white;
+            margin-right: 2px;
+        }
+        .btn-edit { color: var(--primary); }
+        .btn-edit:hover { background: #eff6ff; }
+        .btn-delete { color: var(--danger); }
+        .btn-delete:hover { background: #fef2f2; }
+
+        .plan-item-row {
+            background: #f8fafc;
+            border: 1px solid var(--border);
+            padding: 10px;
+            border-radius: 6px;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .comparison-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        @media (max-width: 1100px) {
+            .comparison-grid { grid-template-columns: 1fr; }
+        }
+
+        .comp-card {
+            padding: 12px;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+        }
+        .comp-card.planned { background: #f0fdf4; border-left: 4px solid var(--success); }
+        .comp-card.actual { background: #f8fafc; border-left: 4px solid var(--primary); }
+
+        .summary-banner {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        .metric-tile {
+            background: #f1f5f9;
+            padding: 10px;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+        }
+
+        /* DB BADGE & MIGRATIONS */
+        .db-badge {
+            background: #f1f5f9;
+            border: 1px solid var(--border);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+        }
+        .db-badge:hover { background: #e2e8f0; }
+        .db-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--danger);
+        }
+        .db-dot.connected { background: var(--success); }
+
+        .migration-panel {
+            background: #f8fafc;
+            border: 1px dashed var(--secondary);
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        .migration-actions {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        .btn-mig {
+            background: white;
+            border: 1px solid var(--secondary);
+            color: var(--text-color);
+            padding: 8px 14px;
+            border-radius: 4px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            cursor: pointer;
+        }
+        .btn-mig:hover { background: #f1f5f9; }
+        .btn-mig.primary-mig {
+            background: #0f172a;
+            color: white;
+            border-color: #0f172a;
+        }
+        .btn-mig.primary-mig:hover { background: #1e293b; }
+
+        /* ANALYTICS IN-TAB CONTROLS */
+        .test-grid-layout {
+            display: grid;
+            grid-template-columns: 1fr 1.8fr;
+            gap: 20px;
+        }
+        @media (max-width: 950px) {
+            .test-grid-layout { grid-template-columns: 1fr !important; }
+        }
+
+        .test-metric-banner {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+        .test-metric-card {
+            background: #f8fafc;
+            border: 1px solid var(--border);
+            padding: 12px;
+            border-radius: 6px;
+            text-align: center;
+        }
+        .test-metric-card h4 { margin: 0; font-size: 0.8rem; color: var(--secondary); text-transform: uppercase; }
+        .test-metric-card p { margin: 6px 0 0 0; font-size: 1.25rem; font-weight: bold; color: var(--text-color); }
+
+        .chart-box {
+            position: relative;
+            background: #f8fafc;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 15px;
+            margin-bottom: 20px;
+            height: 200px;
+        }
+
+        .table-scroller {
+            max-height: 280px;
+            overflow-y: auto;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+        }
+
+        /* CUSTOM MODALS & POPUPS */
+        #custom-toast-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #0f172a;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            display: none;
+            z-index: 10000;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+        #custom-confirm-backdrop {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(4px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+        }
+        .custom-confirm-card {
+            background: var(--card-bg);
+            border-radius: 10px;
+            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1);
+            border: 1px solid var(--border);
+            width: 90%;
+            max-width: 420px;
+            padding: 24px;
+        }
+    </style>
+</head>
+<body>
+
+<datalist id="chapters-list"></datalist>
+<datalist id="topics-list"></datalist>
+
+<div class="container">
+    <header>
+        <div>
+            <h1>JEE Study Tracker & Planner</h1>
+            <div id="db-indicator-badge" class="db-badge" style="margin-top: 5px;" onclick="inspectDatabaseContents()">
+                <div id="db-status-dot" class="db-dot"></div>
+                <span id="db-status-text">Connecting to Storage...</span>
+            </div>
+        </div>
+        <div class="tabs">
+            <button class="tab-btn active" onclick="switchTab('study')">Daily Study Log</button>
+            <button class="tab-btn" onclick="switchTab('test')">Test Analysis</button>
+            <button class="tab-btn" onclick="switchTab('planner')">Structured Target Planner</button>
+            <button class="tab-btn" onclick="switchTab('history')">Historical Records & Sync</button>
+        </div>
+    </header>
+
+    <!-- TAB 1: DAILY STUDY LOG -->
+    <div id="study-panel" class="panel active">
+        <div class="grid">
+            <div class="card">
+                <h2 id="study-form-title">Log Study Session</h2>
+                <hr style="margin:15px 0; border:0; border-top:1px solid var(--border);">
+                <form id="study-form" onsubmit="saveStudyLog(event)">
+                    <input type="hidden" id="study-id">
+                    <div class="form-group">
+                        <label>Date</label>
+                        <input type="date" id="study-date" onchange="renderTodaySummary()" required>
+                    </div>
+                    <div class="grid" style="grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px;">
+                        <div>
+                            <label>Start Time</label>
+                            <input type="time" id="study-start-time" required>
+                        </div>
+                        <div>
+                            <label>End Time</label>
+                            <input type="time" id="study-end-time" required>
+                        </div>
+                    </div>
+                    <div class="grid" style="grid-template-columns: 1fr 1fr; gap: 10px;">
+                        <div class="form-group">
+                            <label>Subject</label>
+                            <select id="study-subject" required>
+                                <option value="Physics">Physics</option>
+                                <option value="Chemistry">Chemistry</option>
+                                <option value="Mathematics">Mathematics</option>
+                                <option value="Biology">Biology</option>
+                                <option value="OrganicChemistry">Organic Chemistry</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Activity</label>
+                            <select id="study-activity" required>
+                                <option value="Reading">Reading</option>
+                                <option value="Examples">Examples</option>
+                                <option value="DPP">DPP</option>
+                                <option value="PYQ">PYQ</option>
+                                <option value="Revision">Revision</option>
+                                <option value="Formula Revision">Formula Revision</option>
+                                <option value="Notes">Notes</option>
+                                <option value="Topic Test">Topic Test</option>
+                                <option value="Mock Test">Mock Test</option>
+                                <option value="Advanced Problems">Advanced Problems</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Chapter Name</label>
+                        <input type="text" id="study-chapter" list="chapters-list" placeholder="Type or select chapter" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Topic Name</label>
+                        <input type="text" id="study-topic" list="topics-list" placeholder="Type or select topic" required>
+                    </div>
+
+                    <div class="counter-container">
+                        <div class="step-selector">
+                            <span>Step Count Size:</span>
+                            <select id="counter-step">
+                                <option value="1" selected>1 Q</option>
+                                <option value="5">5 Qs</option>
+                                <option value="10">10 Qs</option>
+                                <option value="30">30 Qs</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Total Solved</label>
+                            <div class="counter-group">
+                                <button type="button" class="counter-btn" onclick="adjustByStep('study-total', -1)">-</button>
+                                <input type="number" id="study-total" value="0" min="0" class="counter-val">
+                                <button type="button" class="counter-btn" onclick="adjustByStep('study-total', 1)">+</button>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label style="color: var(--success)">Correct</label>
+                            <div class="counter-group">
+                                <button type="button" class="counter-btn" onclick="adjustByStep('study-correct', -1)">-</button>
+                                <input type="number" id="study-correct" value="0" min="0" class="counter-val">
+                                <button type="button" class="counter-btn" onclick="adjustByStep('study-correct', 1)">+</button>
+                            </div>
+                        </div>
+                        <div class="form-group" style="margin-bottom:0;">
+                            <label style="color: var(--danger)">Wrong</label>
+                            <div class="counter-group">
+                                <button type="button" class="counter-btn" onclick="adjustByStep('study-wrong', -1)">-</button>
+                                <input type="number" id="study-wrong" value="0" min="0" class="counter-val">
+                                <button type="button" class="counter-btn" onclick="adjustByStep('study-wrong', 1)">+</button>
+                            </div>
+                        </div>
+                    </div>
+                    <button type="submit" id="study-submit-btn" class="btn-submit">Save Entry</button>
+                    <button type="button" id="study-cancel-btn" class="btn-submit" style="background:#64748b; margin-top:5px; display:none;" onclick="cancelStudyEdit()">Cancel Edit</button>
+                </form>
+            </div>
+            
+            <div class="card">
+                <h2>Logged Sessions</h2>
+                <div id="today-summary-box" style="margin-top: 15px;"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TAB 2: TEST ANALYSIS -->
+    <div id="test-panel" class="panel">
+        <div class="test-grid-layout">
+            <div class="card">
+                <h2 id="test-form-title">Log Test Record</h2>
+                <hr style="margin:15px 0; border:0; border-top:1px solid var(--border);">
+                <form id="test-form" onsubmit="saveTestLog(event)">
+                    <input type="hidden" id="test-id">
+                    
+                    <div class="grid" style="grid-template-columns: 1.2fr 0.8fr; gap:10px;">
+                        <div class="form-group">
+                            <label>Date</label>
+                            <input type="date" id="test-date" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Difficulty</label>
+                            <select id="test-diff">
+                                <option value="Easy">Easy</option>
+                                <option value="Medium" selected>Medium</option>
+                                <option value="Hard">Hard</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="grid" style="grid-template-columns: 1fr 1fr; gap:10px;">
+                        <div class="form-group">
+                            <label>Subject Scope</label>
+                            <select id="test-subject" required>
+                                <option value="Mathematics">Mathematics</option>
+                                <option value="Physics">Physics</option>
+                                <option value="Chemistry">Chemistry</option>
+                                <option value="Biology">Biology</option>
+                                <option value="OrganicChemistry">Organic Chemistry</option>
+                                <option value="Full Mock">Full Mock (PCB/PCM)</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Chapter Name</label>
+                            <input type="text" id="test-chapter" list="chapters-list" placeholder="Calculus, Thermodynamics, etc.">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Topics/Syllabus Scope</label>
+                        <input type="text" id="test-topics" placeholder="Specific conceptual sections evaluated" required>
+                    </div>
+
+                    <div class="grid" style="grid-template-columns: 1fr 1fr 1fr; gap:10px;">
+                        <div class="form-group">
+                            <label>Total Qs</label>
+                            <input type="number" id="test-total" min="0" oninput="validateScoreCalculations()" required>
+                        </div>
+                        <div class="form-group">
+                            <label style="color:var(--success)">Correct</label>
+                            <input type="number" id="test-correct" min="0" oninput="validateScoreCalculations()" required>
+                        </div>
+                        <div class="form-group">
+                            <label style="color:var(--danger)">Wrong</label>
+                            <input type="number" id="test-wrong" min="0" oninput="validateScoreCalculations()" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Time Taken (Minutes)</label>
+                        <input type="number" id="test-time" min="0" required>
+                    </div>
+
+                    <button type="submit" id="test-submit-btn" class="btn-submit">Save Test Record</button>
+                    <button type="button" id="test-cancel-btn" class="btn-submit" style="background:#64748b; margin-top:5px; display:none;" onclick="cancelTestEdit()">Cancel Edit</button>
+                </form>
+            </div>
+
+            <div class="card">
+                <h2>Past Tests Analysis & Performance Ledger</h2>
+                <hr style="margin:15px 0; border:0; border-top:1px solid var(--border);">
+                
+                <!-- Quick Metric Cards inside Ledger column -->
+                <div class="test-metric-banner">
+                    <div class="test-metric-card">
+                        <h4>Mock Exams</h4>
+                        <p id="total-tests-stat">0</p>
+                    </div>
+                    <div class="test-metric-card">
+                        <h4>Avg Accuracy</h4>
+                        <p id="avg-accuracy-stat">0%</p>
+                    </div>
+                    <div class="test-metric-card">
+                        <h4>Total Time</h4>
+                        <p id="total-time-stat">0 mins</p>
+                    </div>
+                </div>
+
+                <!-- Live Trend Chart Canvas -->
+                <h3>Accuracy Trend Progression (%)</h3>
+                <div class="chart-box">
+                    <canvas id="test-chart-canvas" style="width: 100%; height: 100%;"></canvas>
+                </div>
+
+                <!-- Responsive Scroller Table -->
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                    <h3>Historical Mock Exam Log</h3>
+                    <select id="ledger-filter" onchange="renderTestDashboard()" style="width: auto; padding: 4px 8px;">
+                        <option value="All">All Subjects</option>
+                        <option value="Mathematics">Mathematics</option>
+                        <option value="Physics">Physics</option>
+                        <option value="Chemistry">Chemistry</option>
+                        <option value="Biology">Biology</option>
+                        <option value="OrganicChemistry">Organic Chemistry</option>
+                        <option value="Full Mock">Full Mock</option>
+                    </select>
+                </div>
+                
+                <div class="table-scroller">
+                    <table id="test-ledger-inline-table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Scope</th>
+                                <th>Difficulty</th>
+                                <th>Q Ratio (C/W/T)</th>
+                                <th>Accuracy</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="test-ledger-body"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TAB 3: DAILY TARGET PLANNER -->
+    <div id="planner-panel" class="panel">
+        <div class="grid">
+            <div class="card">
+                <h2>Draft Structured Plan</h2>
+                <hr style="margin:15px 0; border:0; border-top:1px solid var(--border);">
+                
+                <div class="form-group" style="display: flex; gap: 8px; align-items: flex-end; margin-bottom: 12px;">
+                    <div style="flex: 1;">
+                        <label>Target Date</label>
+                        <input type="date" id="plan-date" onchange="onPlanDateChange()" required>
+                    </div>
+                    <button type="button" class="btn-action" style="height: 38px; padding: 0 12px; margin-bottom: 0; font-weight: 600;" onclick="navigatePlanDate(-1)" title="Previous Day">◀ Prev</button>
+                    <button type="button" class="btn-action" style="height: 38px; padding: 0 12px; margin-bottom: 0; font-weight: 600;" onclick="navigatePlanDate(0)" title="Current Date">Today</button>
+                    <button type="button" class="btn-action" style="height: 38px; padding: 0 12px; margin-bottom: 0; font-weight: 600;" onclick="navigatePlanDate(1)" title="Next Day">Next ▶</button>
+                </div>
+
+                <!-- PORTING SHIFT/CLONE UTILITY CARD BLOCK FOR QUICK RELOADS -->
+                <div style="background: #f1f5f9; padding: 12px; border-radius: 6px; border: 1px solid var(--border); margin-bottom: 18px;">
+                    <label style="font-size:0.8rem; margin-bottom: 6px; color: var(--primary); display: flex; align-items: center; gap: 4px;">
+                        <span>📋</span> <b>Carry Forward / Clone Plan Utility</b>
+                    </label>
+                    <div style="display: flex; gap: 8px; align-items: center;">
+                        <div style="flex: 1;">
+                            <input type="date" id="clone-source-date" style="height: 34px; padding: 6px; background-color: white;" title="Select plan to clone from">
+                        </div>
+                        <button type="button" class="btn-action" style="height: 34px; font-weight: 600; background: var(--primary); color: white; border: none; padding: 0 16px; border-radius: 4px;" onclick="clonePlanFromSourceDate()" title="Copy planned items from selected source date to current target date">
+                            Clone Plan
+                        </button>
+                    </div>
+                    <p style="margin: 5px 0 0 0; font-size: 0.75rem; color: var(--secondary);">Quickly replicate any previous schedule (defaults to yesterday) to today's date.</p>
+                </div>
+
+                <div style="background: #f8fafc; padding: 12px; border-radius: 6px; border: 1px solid var(--border); margin-bottom: 15px;">
+                    <h3 id="target-item-title" style="font-size: 0.95rem; margin-bottom: 10px; color: var(--primary);">Add Individual Task Target</h3>
+                    
+                    <div class="grid" style="grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px;">
+                        <div>
+                            <label style="font-size:0.75rem;">Start Time</label>
+                            <input type="time" id="plan-start-time">
+                        </div>
+                        <div>
+                            <label style="font-size:0.75rem;">End Time</label>
+                            <input type="time" id="plan-end-time">
+                        </div>
+                    </div>
+
+                    <div class="grid" style="grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px;">
+                        <div>
+                            <label style="font-size:0.75rem;">Subject</label>
+                            <select id="plan-subject">
+                                <option value="Physics">Physics</option>
+                                <option value="Chemistry">Chemistry</option>
+                                <option value="Mathematics">Mathematics</option>
+                                <option value="Biology">Biology</option>
+                                <option value="OrganicChemistry">Organic Chemistry</option>								
+                            </select>
+                        </div>
+                        <div>
+                            <label style="font-size:0.75rem;">Activity</label>
+                            <select id="plan-activity">
+                                <option value="Reading">Reading</option>
+                                <option value="Examples">Examples</option>
+                                <option value="DPP">DPP</option>
+                                <option value="PYQ">PYQ</option>
+                                <option value="Revision">Revision</option>
+                                <option value="Formula Revision">Formula Revision</option>
+                                <option value="Notes">Notes</option>
+                                <option value="Topic Test">Topic Test</option>
+                                <option value="Mock Test">Mock Test</option>
+                                <option value="Advanced Problems">Advanced Problems</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label style="font-size:0.75rem;">Chapter Name</label>
+                        <input type="text" id="plan-chapter" list="chapters-list" placeholder="Type or select chapter">
+                    </div>
+                    <div class="form-group" style="margin-bottom: 10px;">
+                        <label style="font-size:0.75rem;">Topic Name</label>
+                        <input type="text" id="plan-topic" list="topics-list" placeholder="Type or select topic">
+                    </div>
+
+                    <div class="grid" style="grid-template-columns: 1fr 1fr 1fr; gap: 6px; margin-bottom: 12px; background: #ffffff; padding: 8px; border-radius: 4px; border: 1px solid var(--border);">
+                        <div>
+                            <label style="font-size:0.7rem;">Target Qs</label>
+                            <input type="number" id="plan-total-qs" value="0" min="0">
+                        </div>
+                        <div>
+                            <label style="font-size:0.7rem; color: var(--success);">Expected Correct</label>
+                            <input type="number" id="plan-correct-qs" value="0" min="0">
+                        </div>
+                        <div>
+                            <label style="font-size:0.7rem; color: var(--danger);">Max Allowed Wrong</label>
+                            <input type="number" id="plan-wrong-qs" value="0" min="0">
+                        </div>
+                    </div>
+
+                    <button type="button" id="btn-add-plan-item" class="btn-submit" style="background: #475569; padding: 8px;" onclick="addTaskToPlanList()">+ Add Target Item</button>
+                </div>
+
+                <h3>Items Stored for Staged Plan:</h3>
+                <div id="staged-plan-items" style="margin: 10px 0;"></div>
+
+                <button type="button" class="btn-submit" onclick="commitFullPlan()">Save Full Day Target Plan</button>
+            </div>
+
+            <div class="card">
+                <h2>Planned vs. Actual Evaluation</h2>
+                <div id="comparison-output"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TAB 4: HISTORICAL RECORDS & SYNC -->
+    <div id="history-panel" class="panel">
+        
+        <!-- EXPORT / IMPORT INFRASTRUCTURE SECTION -->
+        <div class="migration-panel">
+            <div>
+                <h3 style="color:#0f172a;">Cross-Device Data Synchronization</h3>
+                <p style="margin:4px 0 0 0; font-size:0.85rem; color:var(--secondary);">Backup your ecosystem or import records from another device via JSON schemas.</p>
+            </div>
+            <div class="migration-actions">
+                <button type="button" class="btn-mig primary-mig" onclick="exportDataPackage()">↓ Export App Data</button>
+                <button type="button" class="btn-mig" onclick="document.getElementById('import-file-node').click()">↑ Import App Data</button>
+                <input type="file" id="import-file-node" accept=".json" style="display:none;" onchange="importDataPackage(event)">
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Study Logs Ledger</h2>
+            <div style="overflow-x:auto;">
+                <table id="study-table">
+                    <thead>
+                        <tr>
+                            <th>Timestamp</th>
+                            <th>Time Frame</th>
+                            <th>Subject</th>
+                            <th>Chapter (Topic)</th>
+                            <th>Activity</th>
+                            <th>Solved</th>
+                            <th>Correct/Wrong</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Test Performance Ledger</h2>
+            <div style="overflow-x:auto;">
+                <table id="test-table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Topics / Chapters</th>
+                            <th>Difficulty</th>
+                            <th>Duration</th>
+                            <th>Score Stats</th>
+                            <th>Accuracy</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- TOAST & MODAL OVERLAY STORES -->
+<div id="custom-toast-container"></div>
+<div id="custom-confirm-backdrop">
+    <div class="custom-confirm-card">
+        <h3 id="confirm-modal-title" style="margin-top:0; font-size: 1.15rem;">Action Confirmation Requested</h3>
+        <p id="confirm-modal-message" style="margin: 12px 0 20px 0; color: var(--secondary); font-size: 0.95rem; line-height:1.4; white-space: pre-wrap;"></p>
+        <div style="display:flex; justify-content: flex-end; gap:10px;">
+            <button id="confirm-modal-no" class="btn-submit" style="background:#64748b; width:auto; padding: 8px 18px;">Cancel</button>
+            <button id="confirm-modal-yes" class="btn-submit" style="width:auto; padding: 8px 18px;">Confirm</button>
+        </div>
+    </div>
+</div>
+
+<!-- JAVASCRIPT SYSTEM ENGINE -->
+<script>
+    let db;
+    let localStagedTasks = []; 
+    let editingTaskIndex = null; 
+
+    // Timezone-safe local calendar date formatter to avoid UTC shifts
+    function getLocalDateString(dateObj = new Date()) {
+        const year = dateObj.getFullYear();
+        const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+        const day = String(dateObj.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    }
+    
+    const now = new Date();
+    const todayDate = getLocalDateString(now);
+    const timeNow = now.toTimeString().split(' ')[0].substring(0, 5);
+
+    // Default dates
+    document.getElementById('study-date').value = todayDate;
+    document.getElementById('study-start-time').value = timeNow;
+    document.getElementById('study-end-time').value = timeNow;
+    document.getElementById('test-date').value = todayDate;
+    document.getElementById('plan-date').value = todayDate;
+    document.getElementById('plan-start-time').value = "09:00";
+    document.getElementById('plan-end-time').value = "10:30";
+
+    // Set clone source date default to yesterday
+    const yesterdayDateObj = new Date();
+    yesterdayDateObj.setDate(yesterdayDateObj.getDate() - 1);
+    document.getElementById('clone-source-date').value = getLocalDateString(yesterdayDateObj);
+
+    // --- POPUP SYSTEM UTILITIES ---
+    function triggerToast(message) {
+        const toast = document.getElementById('custom-toast-container');
+        toast.innerText = message;
+        toast.style.display = 'block';
+        setTimeout(() => { toast.style.display = 'none'; }, 3000);
+    }
+
+    // Accepts optional noCallback to let date switching roll back safely
+    function triggerConfirmation(message, yesCallback, noCallback) {
+        const backdrop = document.getElementById('custom-confirm-backdrop');
+        const messageContainer = document.getElementById('confirm-modal-message');
+        const yesButton = document.getElementById('confirm-modal-yes');
+        const noButton = document.getElementById('confirm-modal-no');
+
+        messageContainer.innerText = message;
+        backdrop.style.display = 'flex';
+
+        const teardown = () => {
+            backdrop.style.display = 'none';
+            yesButton.onclick = null;
+            noButton.onclick = null;
+        };
+
+        yesButton.onclick = () => {
+            yesCallback();
+            teardown();
+        };
+        noButton.onclick = () => {
+            if (noCallback) noCallback();
+            teardown();
+        };
+    }
+
+    // --- SANDBOXED STORAGE FALLBACK ENGINE ---
+    class MemoryObjectStore {
+        constructor(storeName) {
+            this.storeName = storeName;
+        }
+        _getData() {
+            try {
+                const data = localStorage.getItem("fallback_" + this.storeName);
+                return data ? JSON.parse(data) : [];
+            } catch(e) {
+                return this.fallbackArray || (this.fallbackArray = []);
+            }
+        }
+        _saveData(arr) {
+            try {
+                localStorage.setItem("fallback_" + this.storeName, JSON.stringify(arr));
+            } catch(e) {
+                this.fallbackArray = arr;
+            }
+        }
+        count() {
+            const req = { onsuccess: null };
+            setTimeout(() => {
+                if (req.onsuccess) req.onsuccess({ target: { result: this._getData().length } });
+            }, 0);
+            return req;
+        }
+        getAll() {
+            const req = { onsuccess: null };
+            setTimeout(() => {
+                if (req.onsuccess) req.onsuccess({ target: { result: this._getData() } });
+            }, 0);
+            return req;
+        }
+        get(key) {
+            const req = { onsuccess: null };
+            setTimeout(() => {
+                const list = this._getData();
+                const item = list.find(x => (x.id === key || x.date === key));
+                if (req.onsuccess) req.onsuccess({ target: { result: item } });
+            }, 0);
+            return req;
+        }
+        put(item) {
+            const req = { onsuccess: null };
+            setTimeout(() => {
+                const list = this._getData();
+                if (this.storeName === "plans") {
+                    const idx = list.findIndex(x => x.date === item.date);
+                    if (idx !== -1) list[idx] = item;
+                    else list.push(item);
+                } else {
+                    if (item.id) {
+                        const idx = list.findIndex(x => x.id === item.id);
+                        if (idx !== -1) list[idx] = item;
+                        else list.push(item);
+                    } else {
+                        const maxId = list.reduce((max, x) => Math.max(max, x.id || 0), 0);
+                        item.id = maxId + 1;
+                        list.push(item);
+                    }
+                }
+                this._saveData(list);
+                if (req.onsuccess) req.onsuccess({ target: { result: item.id || item.date } });
+            }, 0);
+            return req;
+        }
+        delete(key) {
+            const req = { onsuccess: null };
+            setTimeout(() => {
+                let list = this._getData();
+                list = list.filter(x => (x.id !== key && x.date !== key));
+                this._saveData(list);
+                if (req.onsuccess) req.onsuccess({ target: { result: key } });
+            }, 0);
+            return req;
+        }
+    }
+
+    class MemoryTransaction {
+        constructor(storeNames) {
+            this.storeNames = storeNames;
+            setTimeout(() => {
+                if (this.oncomplete) this.oncomplete();
+            }, 20);
+        }
+        objectStore(name) {
+            if (!window.fallbackStores) window.fallbackStores = {};
+            if (!window.fallbackStores[name]) {
+                window.fallbackStores[name] = new MemoryObjectStore(name);
+            }
+            return window.fallbackStores[name];
+        }
+    }
+
+    const fallbackDb = {
+        transaction: (stores) => new MemoryTransaction(stores),
+        isFallback: true
+    };
+
+    function setupFallbackStorage(fallbackLabel) {
+        initAppWithDb(fallbackDb, fallbackLabel);
+    }
+
+    // --- DATABASE INITIALIZATION ENGINE ---
+    function initAppWithDb(databaseInstance, storageLabel) {
+        db = databaseInstance;
+        updateLiveStorageIndicator(storageLabel);
+        refreshDropdownLists();
+        renderTodaySummary();
+        loadPlanComparison();
+        renderTestDashboard();
+    }
+
+    try {
+        const request = indexedDB.open("JEESprintPlannerDBPro", 6);
+        
+        const connectionTimeout = setTimeout(() => {
+            console.warn("IndexedDB initialization timed out. Launching browser storage fallback.");
+            setupFallbackStorage("Sandbox Web Storage");
+        }, 1200);
+
+        request.onupgradeneeded = function(e) {
+            let database = e.target.result;
+            if (!database.objectStoreNames.contains("studyLogs")) {
+                database.createObjectStore("studyLogs", { keyPath: "id", autoIncrement: true });
+            }
+            if (!database.objectStoreNames.contains("testLogs")) {
+                database.createObjectStore("testLogs", { keyPath: "id", autoIncrement: true });
+            }
+            if (!database.objectStoreNames.contains("plans")) {
+                database.createObjectStore("plans", { keyPath: "date" });
+            }
+        };
+
+        request.onsuccess = function(e) {
+            clearTimeout(connectionTimeout);
+            initAppWithDb(e.target.result, "IndexedDB Sandbox");
+        };
+
+        request.onerror = function(e) {
+            clearTimeout(connectionTimeout);
+            console.warn("IndexedDB access denied. Re-routing to local storage.");
+            setupFallbackStorage("Sandbox Web Storage");
+        };
+
+        request.onblocked = function() {
+            clearTimeout(connectionTimeout);
+            setupFallbackStorage("Sandbox Web Storage");
+        };
+    } catch (err) {
+        console.warn("IndexedDB blocked by context security. Triggering web storage fallback.", err);
+        setupFallbackStorage("Sandbox Web Storage");
+    }
+
+    // SYSTEM INTEGRITY VERIFICATION UTILITIES
+    function updateLiveStorageIndicator(storageLabel) {
+        if (!db) return;
+        let studyCount = 0, testCount = 0, planCount = 0;
+        
+        const labelText = storageLabel || (db.isFallback ? "Sandbox Web Storage" : "IndexedDB Storage");
+        const tx = db.transaction(["studyLogs", "testLogs", "plans"], "readonly");
+        
+        tx.objectStore("studyLogs").count().onsuccess = (e) => { studyCount = e.target.result; };
+        tx.objectStore("testLogs").count().onsuccess = (e) => { testCount = e.target.result; };
+        tx.objectStore("plans").count().onsuccess = (e) => { 
+            planCount = e.target.result; 
+            const totalRecords = studyCount + testCount + planCount;
+            
+            const dot = document.getElementById('db-status-dot');
+            const text = document.getElementById('db-status-text');
+            
+            dot.className = "db-dot connected";
+            if (db.isFallback) {
+                dot.style.background = "#eab308"; // warning color
+                text.innerHTML = `${labelText} Active | <b style="color:#d97706;">${totalRecords} records</b> inline (Click to inspect)`;
+            } else {
+                dot.style.background = "var(--success)";
+                text.innerHTML = `${labelText} Connected | <b style="color:var(--primary);">${totalRecords} records</b> inline (Click to inspect)`;
+            }
+        };
+    }
+
+    // Replaced standard window alert dialogs with confirmation overlays
+    function inspectDatabaseContents() {
+        if (!db) return;
+        const tx = db.transaction(["studyLogs", "testLogs", "plans"], "readonly");
+        let studyDetails = [], testDetails = [], planDetails = [];
+
+        tx.objectStore("studyLogs").getAll().onsuccess = (e) => { studyDetails = e.target.result; };
+        tx.objectStore("testLogs").getAll().onsuccess = (e) => { testDetails = e.target.result; };
+        tx.objectStore("plans").getAll().onsuccess = (e) => {
+            planDetails = e.target.result;
+            
+            const summaryString = `--- INTERNAL STORAGE AUDIT PROFILE ---\n\n` +
+                `✓ Active Storage Engine: ${db.isFallback ? 'Sandbox Local Storage (Safe Fallback)' : 'IndexedDB High Performance'}\n` +
+                `✓ Study Session Records: ${studyDetails.length}\n` +
+                `✓ Evaluated Practice Tests: ${testDetails.length}\n` +
+                `✓ Target Schedule Sheets Locked: ${planDetails.length}\n\n` +
+                `Status Confirmation: Complete database sandbox verified offline inside your browser secure cache.`;
+            
+            triggerConfirmation(summaryString, () => {});
+        };
+    }
+
+    // CROSS DEVICE INTERFACES (EXPORT / IMPORT ENGINE)
+    function exportDataPackage() {
+        if (!db) return triggerToast("Database engine currently offline.");
+        
+        const tx = db.transaction(["studyLogs", "testLogs", "plans"], "readonly");
+        const exportPackage = { studyLogs: [], testLogs: [], plans: [] };
+
+        tx.objectStore("studyLogs").getAll().onsuccess = (e) => { exportPackage.studyLogs = e.target.result; };
+        tx.objectStore("testLogs").getAll().onsuccess = (e) => { exportPackage.testLogs = e.target.result; };
+        tx.objectStore("plans").getAll().onsuccess = (e) => {
+            exportPackage.plans = e.target.result;
+            
+            const serializedData = JSON.stringify(exportPackage, null, 2);
+            const dataBlob = new Blob([serializedData], { type: "application/json" });
+            const temporaryAnchor = document.createElement("a");
+            
+            temporaryAnchor.href = URL.createObjectURL(dataBlob);
+            temporaryAnchor.download = `JEE_SprintMaster_Backup_${getLocalDateString()}.json`;
+            document.body.appendChild(temporaryAnchor);
+            temporaryAnchor.click();
+            document.body.removeChild(temporaryAnchor);
+            triggerToast("JSON backup package generated successfully.");
+        };
+    }
+
+    function importDataPackage(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            try {
+                const parsedData = JSON.parse(e.target.result);
+                if (!parsedData.studyLogs || !parsedData.testLogs || !parsedData.plans) {
+                    throw new Error("Invalid schema profile structures.");
+                }
+
+                triggerConfirmation("This process will overlay imported records onto your existing profile. Proceed with synchronization?", () => {
+                    const tx = db.transaction(["studyLogs", "testLogs", "plans"], "readwrite");
+                    
+                    parsedData.studyLogs.forEach(item => {
+                        delete item.id; 
+                        tx.objectStore("studyLogs").put(item);
+                    });
+                    
+                    parsedData.testLogs.forEach(item => {
+                        delete item.id;
+                        tx.objectStore("testLogs").put(item);
+                    });
+                    
+                    parsedData.plans.forEach(item => {
+                        tx.objectStore("plans").put(item);
+                    });
+
+                    tx.oncomplete = () => {
+                        triggerToast("Ecosystem sync complete! Storage metrics updated.");
+                        updateLiveStorageIndicator();
+                        refreshDropdownLists();
+                        renderTodaySummary();
+                        loadPlanComparison();
+                        renderTestDashboard();
+                        if(document.getElementById('history-panel').classList.contains('active')) renderHistory();
+                    };
+                });
+            } catch (err) {
+                triggerToast("Sync error: Selected backup file maps incompatible keys.");
+            }
+        };
+        reader.readAsText(file);
+    }
+
+    function switchTab(tabName) {
+        document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById(tabName + '-panel').classList.add('active');
+        if (event) event.currentTarget.classList.add('active');
+        
+        refreshDropdownLists();
+        if(tabName === 'history') renderHistory();
+        if(tabName === 'planner') {
+            // By default, if there is no unsaved custom draft in progress, reset the display to the current date
+            if (!isPlanDraftDirty) {
+                document.getElementById('plan-date').value = getLocalDateString(new Date());
+            }
+            loadPlanComparison();
+        }
+        if(tabName === 'study') renderTodaySummary();
+        if(tabName === 'test') renderTestDashboard();
+    }
+
+    function navigatePlanDate(offset) {
+        const dateInput = document.getElementById('plan-date');
+        if (offset === 0) {
+            const now = new Date();
+            dateInput.value = getLocalDateString(now);
+        } else {
+            const currentVal = dateInput.value || getLocalDateString(new Date());
+            const parts = currentVal.split('-');
+            if (parts.length === 3) {
+                const d = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
+                d.setDate(d.getDate() + offset);
+                dateInput.value = getLocalDateString(d);
+            }
+        }
+        onPlanDateChange();
+    }
+
+    function adjustByStep(id, direction) {
+        let el = document.getElementById(id);
+        let step = parseInt(document.getElementById('counter-step').value) || 1;
+        let curr = parseInt(el.value) || 0;
+        el.value = Math.max(0, curr + (direction * step));
+        validateScoreCalculations();
+    }
+
+    // DROPDOWNS ENGINE
+    function refreshDropdownLists() {
+        if (!db) return;
+        const chaptersSet = new Set();
+        const topicsSet = new Set();
+
+        db.transaction("studyLogs").objectStore("studyLogs").getAll().onsuccess = (e) => {
+            e.target.result.forEach(log => {
+                if(log.chapter) chaptersSet.add(log.chapter.trim());
+                if(log.topic) topicsSet.add(log.topic.trim());
+            });
+
+            db.transaction("testLogs").objectStore("testLogs").getAll().onsuccess = (te) => {
+                te.target.result.forEach(testLog => {
+                    if(testLog.chapter) chaptersSet.add(testLog.chapter.trim());
+                    if(testLog.topics) topicsSet.add(testLog.topics.trim());
+                });
+
+                db.transaction("plans").objectStore("plans").getAll().onsuccess = (ev) => {
+                    ev.target.result.forEach(p => {
+                        if (Array.isArray(p.tasks)) {
+                            p.tasks.forEach(t => {
+                                if(t.chapter) chaptersSet.add(t.chapter.trim());
+                                if(t.topic) topicsSet.add(t.topic.trim());
+                            });
+                        }
+                    });
+
+                    buildDatalistOptions("chapters-list", chaptersSet);
+                    buildDatalistOptions("topics-list", topicsSet);
+                };
+            };
+        };
+    }
+
+    function buildDatalistOptions(elementId, dataset) {
+        const dl = document.getElementById(elementId);
+        dl.innerHTML = "";
+        Array.from(dataset).sort().forEach(val => {
+            const opt = document.createElement('option');
+            opt.value = val;
+            dl.appendChild(opt);
+        });
+    }
+
+    // STUDY LOGS ENGINE
+    function saveStudyLog(e) {
+        e.preventDefault();
+        const tx = db.transaction(["studyLogs"], "readwrite");
+        const store = tx.objectStore("studyLogs");
+        
+        const idVal = document.getElementById('study-id').value;
+        const log = {
+            date: document.getElementById('study-date').value,
+            startTime: document.getElementById('study-start-time').value,
+            endTime: document.getElementById('study-end-time').value,
+            subject: document.getElementById('study-subject').value,
+            chapter: document.getElementById('study-chapter').value,
+            topic: document.getElementById('study-topic').value,
+            activity: document.getElementById('study-activity').value,
+            total: parseInt(document.getElementById('study-total').value) || 0,
+            correct: parseInt(document.getElementById('study-correct').value) || 0,
+            wrong: parseInt(document.getElementById('study-wrong').value) || 0
+        };
+
+        if (idVal) { log.id = parseInt(idVal); }
+
+        store.put(log).onsuccess = () => {
+            cancelStudyEdit();
+            updateLiveStorageIndicator();
+            refreshDropdownLists();
+            renderTodaySummary();
+            triggerToast("Study session tracked successfully.");
+        };
+    }
+
+    function editStudyLog(id) {
+        db.transaction("studyLogs").objectStore("studyLogs").get(id).onsuccess = (e) => {
+            const data = e.target.result;
+            document.getElementById('study-id').value = data.id;
+            document.getElementById('study-date').value = data.date;
+            document.getElementById('study-start-time').value = data.startTime || "00:00";
+            document.getElementById('study-end-time').value = data.endTime || "00:00";
+            document.getElementById('study-subject').value = data.subject;
+            document.getElementById('study-chapter').value = data.chapter;
+            document.getElementById('study-topic').value = data.topic;
+            document.getElementById('study-activity').value = data.activity;
+            document.getElementById('study-total').value = data.total;
+            document.getElementById('study-correct').value = data.correct;
+            document.getElementById('study-wrong').value = data.wrong;
+
+            document.getElementById('study-form-title').innerText = "Edit Session Entry";
+            document.getElementById('study-submit-btn').innerText = "Update Entry";
+            document.getElementById('study-cancel-btn').style.display = "block";
+            switchTab('study');
+        };
+    }
+
+    function cancelStudyEdit() {
+        document.getElementById('study-form').reset();
+        document.getElementById('study-id').value = "";
+        const rightNow = new Date();
+        document.getElementById('study-date').value = getLocalDateString(rightNow);
+        document.getElementById('study-start-time').value = rightNow.toTimeString().split(' ')[0].substring(0, 5);
+        document.getElementById('study-end-time').value = rightNow.toTimeString().split(' ')[0].substring(0, 5);
+        document.getElementById('study-form-title').innerText = "Log Study Session";
+        document.getElementById('study-submit-btn').innerText = "Save Entry";
+        document.getElementById('study-cancel-btn').style.display = "none";
+    }
+
+    function deleteStudyLog(id) {
+        triggerConfirmation("Permanently delete this study session log?", () => {
+            db.transaction(["studyLogs"], "readwrite").objectStore("studyLogs").delete(id).onsuccess = () => {
+                triggerToast("Entry permanently cleared.");
+                updateLiveStorageIndicator();
+                renderHistory();
+                renderTodaySummary();
+            };
+        });
+    }
+
+    // --- TEST LOGS CALCULATIVE ASSISTANCE ---
+    function validateScoreCalculations() {
+        const total = parseInt(document.getElementById('test-total').value) || 0;
+        const correct = parseInt(document.getElementById('test-correct').value) || 0;
+        const wrong = parseInt(document.getElementById('test-wrong').value) || 0;
+        
+        if (correct + wrong > total) {
+            document.getElementById('test-total').style.borderColor = 'var(--danger)';
+        } else {
+            document.getElementById('test-total').style.borderColor = 'var(--border)';
+        }
+    }
+
+    // --- TEST RECORDS & ANALYTICS LEDGER ENGINE ---
+    function saveTestLog(e) {
+        e.preventDefault();
+        const total = parseInt(document.getElementById('test-total').value) || 0;
+        const correct = parseInt(document.getElementById('test-correct').value) || 0;
+        const wrong = parseInt(document.getElementById('test-wrong').value) || 0;
+
+        if (correct + wrong > total) {
+            triggerToast("Validation error: Correct + Wrong counts exceed total questions.");
+            return;
+        }
+
+        const tx = db.transaction(["testLogs"], "readwrite");
+        const store = tx.objectStore("testLogs");
+        const idVal = document.getElementById('test-id').value;
+
+        const log = {
+            date: document.getElementById('test-date').value,
+            subject: document.getElementById('test-subject').value,
+            chapter: document.getElementById('test-chapter').value.trim() || "Full Syllabus",
+            difficulty: document.getElementById('test-diff').value,
+            topics: document.getElementById('test-topics').value,
+            total: total,
+            correct: correct,
+            wrong: wrong,
+            time: parseInt(document.getElementById('test-time').value) || 0
+        };
+
+        if (idVal) { log.id = parseInt(idVal); }
+
+        store.put(log).onsuccess = () => {
+            cancelTestEdit();
+            updateLiveStorageIndicator();
+            refreshDropdownLists();
+            renderTestDashboard();
+            triggerToast("Test parameters secured.");
+        };
+    }
+
+    function editTestLog(id) {
+        db.transaction("testLogs").objectStore("testLogs").get(id).onsuccess = (e) => {
+            const data = e.target.result;
+            document.getElementById('test-id').value = data.id;
+            document.getElementById('test-date').value = data.date;
+            document.getElementById('test-diff').value = data.difficulty;
+            document.getElementById('test-subject').value = data.subject || "Full Mock";
+            document.getElementById('test-chapter').value = data.chapter || "";
+            document.getElementById('test-topics').value = data.topics || "";
+            document.getElementById('test-total').value = data.total;
+            document.getElementById('test-correct').value = data.correct;
+            document.getElementById('test-wrong').value = data.wrong;
+            document.getElementById('test-time').value = data.time;
+
+            document.getElementById('test-form-title').innerText = "Edit Test Record";
+            document.getElementById('test-submit-btn').innerText = "Update Record";
+            document.getElementById('test-cancel-btn').style.display = "block";
+            switchTab('test');
+        };
+    }
+
+    function cancelTestEdit() {
+        document.getElementById('test-form').reset();
+        document.getElementById('test-id').value = "";
+        document.getElementById('test-date').value = getLocalDateString();
+        document.getElementById('test-form-title').innerText = "Log Test Record";
+        document.getElementById('test-submit-btn').innerText = "Save Test Record";
+        document.getElementById('test-cancel-btn').style.display = "none";
+    }
+
+    function deleteTestLog(id) {
+        triggerConfirmation("Are you sure you want to permanently clear this test record?", () => {
+            db.transaction(["testLogs"], "readwrite").objectStore("testLogs").delete(id).onsuccess = () => {
+                triggerToast("Test entry deleted.");
+                updateLiveStorageIndicator();
+                renderTestDashboard();
+                if(document.getElementById('history-panel').classList.contains('active')) renderHistory();
+            };
+        });
+    }
+
+    // --- TEST PERFORMANCE ANALYTICS LEDGER & TREND GENERATION ---
+    function renderTestDashboard() {
+        if (!db) return;
+
+        const selectedFilter = document.getElementById('ledger-filter').value;
+        const tbody = document.getElementById('test-ledger-body');
+        tbody.innerHTML = '';
+
+        db.transaction("testLogs").objectStore("testLogs").getAll().onsuccess = (event) => {
+            const rawRecords = event.target.result;
+            
+            // Filter records based on selected dropdown
+            const filteredRecords = rawRecords.filter(item => {
+                if (selectedFilter === 'All') return true;
+                return (item.subject || 'Full Mock') === selectedFilter;
+            });
+
+            // Calculate KPIs
+            const totalTests = filteredRecords.length;
+            let sumTotalQs = 0;
+            let sumCorrect = 0;
+            let sumTime = 0;
+
+            filteredRecords.forEach(r => {
+                sumTotalQs += (r.total || 0);
+                sumCorrect += (r.correct || 0);
+                sumTime += (r.time || 0);
+            });
+
+            const aggregateAccuracy = sumTotalQs > 0 ? Math.round((sumCorrect / sumTotalQs) * 100) : 0;
+
+            document.getElementById('total-tests-stat').innerText = totalTests;
+            document.getElementById('avg-accuracy-stat').innerText = `${aggregateAccuracy}%`;
+            document.getElementById('total-time-stat').innerText = `${sumTime} min`;
+
+            // Sort chronically for trend generation, keep original records sequence reversely for table log
+            const chronologicalRecords = [...filteredRecords].sort((a,b) => a.date.localeCompare(b.date));
+            drawTestTrendChart(chronologicalRecords);
+
+            const displayRecords = [...filteredRecords].sort((a,b) => b.date.localeCompare(a.date));
+
+            if (displayRecords.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:var(--secondary); padding: 20px;">No tests match search filter.</td></tr>`;
+                return;
+            }
+
+            displayRecords.forEach(log => {
+                const accuracy = log.total > 0 ? Math.round((log.correct / log.total) * 100) : 0;
+                let accuracyBadgeClass = 'danger';
+                if (accuracy >= 75) accuracyBadgeClass = 'success';
+                else if (accuracy >= 55) accuracyBadgeClass = 'warning';
+
+                const scopeDisplay = log.subject ? `${log.subject} - <small>${log.chapter}</small>` : log.topics;
+
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td><code>${log.date}</code></td>
+                    <td><b>${scopeDisplay}</b></td>
+                    <td><span class="badge ${log.difficulty==='Hard'?'danger':log.difficulty==='Easy'?'success':'warning'}">${log.difficulty}</span></td>
+                    <td>${log.correct} / ${log.wrong} <small style="color:var(--secondary)">of ${log.total}</small></td>
+                    <td><span class="badge ${accuracyBadgeClass}">${accuracy}%</span></td>
+                    <td>
+                        <button class="btn-action btn-edit" onclick="editTestLog(${log.id})">Edit</button>
+                        <button class="btn-action btn-delete" onclick="deleteTestLog(${log.id})">Del</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        };
+    }
+
+    // --- HTML5 CANVAS GRAPH WRITER ENGINE ---
+    function drawTestTrendChart(records) {
+        const canvas = document.getElementById('test-chart-canvas');
+        if (!canvas) return;
+
+        const ctx = canvas.getContext('2d');
+        const dpr = window.devicePixelRatio || 1;
+        
+        // Match container bounds dynamically
+        const rect = canvas.getBoundingClientRect();
+        canvas.width = rect.width * dpr;
+        canvas.height = rect.height * dpr;
+        ctx.scale(dpr, dpr);
+
+        ctx.clearRect(0, 0, rect.width, rect.height);
+
+        if (records.length < 2) {
+            ctx.font = "14px sans-serif";
+            ctx.fillStyle = "var(--secondary)";
+            ctx.textAlign = "center";
+            ctx.fillText("Provide at least 2 test logs to compile accuracy trends.", rect.width / 2, rect.height / 2);
+            return;
+        }
+
+        const paddingLeft = 40;
+        const paddingRight = 20;
+        const paddingTop = 20;
+        const paddingBottom = 30;
+
+        const chartWidth = rect.width - paddingLeft - paddingRight;
+        const chartHeight = rect.height - paddingTop - paddingBottom;
+
+        // Draw background limits indicators (Grid rules)
+        ctx.strokeStyle = '#f1f5f9';
+        ctx.lineWidth = 1;
+
+        for (let i = 0; i <= 4; i++) {
+            const yVal = 25 * i;
+            const yPos = rect.height - paddingBottom - (chartHeight * (yVal / 100));
+            ctx.beginPath();
+            ctx.moveTo(paddingLeft, yPos);
+            ctx.lineTo(rect.width - paddingRight, yPos);
+            ctx.stroke();
+
+            // Y Axis Labels
+            ctx.font = "10px sans-serif";
+            ctx.fillStyle = "var(--secondary)";
+            ctx.textAlign = "right";
+            ctx.fillText(`${yVal}%`, paddingLeft - 8, yPos + 3);
+        }
+
+        // Project coordinate plots
+        const points = [];
+        const xStep = chartWidth / (records.length - 1);
+
+        records.forEach((record, index) => {
+            const accuracy = record.total > 0 ? (record.correct / record.total) * 100 : 0;
+            const xPos = paddingLeft + (xStep * index);
+            const yPos = rect.height - paddingBottom - (chartHeight * (accuracy / 100));
+            points.push({ x: xPos, y: yPos, acc: accuracy, date: record.date });
+        });
+
+        // Draw trend connecting curves
+        ctx.beginPath();
+        ctx.strokeStyle = "var(--primary)";
+        ctx.lineWidth = 2.5;
+        ctx.lineJoin = "round";
+
+        points.forEach((pt, i) => {
+            if (i === 0) ctx.moveTo(pt.x, pt.y);
+            else ctx.lineTo(pt.x, pt.y);
+        });
+        ctx.stroke();
+
+        // Draw visual dots & date tick indicators
+        points.forEach((pt, i) => {
+            ctx.beginPath();
+            ctx.arc(pt.x, pt.y, 4, 0, Math.PI * 2);
+            ctx.fillStyle = "var(--primary)";
+            ctx.fill();
+            ctx.lineWidth = 2;
+            ctx.strokeStyle = "#ffffff";
+            ctx.stroke();
+
+            // Intermittent X Labels to preserve clarity
+            if (records.length <= 5 || i === 0 || i === records.length - 1 || i === Math.floor(records.length / 2)) {
+                ctx.font = "9px sans-serif";
+                ctx.fillStyle = "var(--secondary)";
+                ctx.textAlign = "center";
+                const shortDate = pt.date.substring(5); // Show MM-DD format
+                ctx.fillText(shortDate, pt.x, rect.height - 10);
+            }
+        });
+    }
+
+    // --- TARGET PLANNER ENGINE WITH SAFE DRAFT NAVIGATION ---
+    let lastLoadedDate = todayDate;
+    let isPlanDraftDirty = false;
+
+    function onPlanDateChange() {
+        const newDate = document.getElementById('plan-date').value;
+        if (newDate === lastLoadedDate) return;
+
+        // If user changed the date but has drafted targets in queue, prompt them safely
+        if (localStagedTasks.length > 0 && isPlanDraftDirty) {
+            triggerConfirmation(
+                `You have an unsaved schedule drafted for ${lastLoadedDate}. Would you like to carry these targets over to ${newDate}?\n\n(Confirm = copy targets to ${newDate}, Cancel = discard current draft and load ${newDate}'s saved plan.)`,
+                // YES: Keep drafted list, carry it over to the new date and load actual logs
+                () => {
+                    lastLoadedDate = newDate;
+                    isPlanDraftDirty = true;
+                    refreshActualLogsForComparison(newDate);
+                },
+                // NO: Discard unsaved draft and load the scheduled plan for the selected date
+                () => {
+                    lastLoadedDate = newDate;
+                    isPlanDraftDirty = false;
+                    loadPlanComparison();
+                }
+            );
+        } else {
+            lastLoadedDate = newDate;
+            isPlanDraftDirty = false;
+            loadPlanComparison();
+        }
+    }
+
+    // --- TARGET REPLICATION / CLONING ENGINE ---
+    function clonePlanFromSourceDate() {
+        const sourceDate = document.getElementById('clone-source-date').value;
+        const targetDate = document.getElementById('plan-date').value;
+        
+        if (!sourceDate) {
+            triggerToast("Please select a source date to replicate from.");
+            return;
+        }
+        if (sourceDate === targetDate) {
+            triggerToast("Source and target dates must be different to carry forward.");
+            return;
+        }
+
+        db.transaction("plans").objectStore("plans").get(sourceDate).onsuccess = (e) => {
+            const planData = e.target.result;
+            if (planData && planData.tasks && planData.tasks.length > 0) {
+                triggerConfirmation(
+                    `Copy plan with ${planData.tasks.length} target tasks from ${sourceDate} into ${targetDate}?\n\nThis will load the list as a draft for ${targetDate}. Make sure to click 'Save Full Day Target Plan' at the bottom to lock it.`,
+                    () => {
+                        localStagedTasks = JSON.parse(JSON.stringify(planData.tasks));
+                        isPlanDraftDirty = true;
+                        renderStagedUIList();
+                        refreshActualLogsForComparison(targetDate);
+                        triggerToast(`Pulled ${planData.tasks.length} targets successfully! Save them below when ready.`);
+                    }
+                );
+            } else {
+                triggerToast(`No saved target schedule found on the source date: ${sourceDate}`);
+            }
+        };
+    }
+
+    function navigatePlanDate(offset) {
+        const dateInput = document.getElementById('plan-date');
+        if (offset === 0) {
+            const now = new Date();
+            dateInput.value = getLocalDateString(now);
+        } else {
+            const currentVal = dateInput.value || getLocalDateString(new Date());
+            const parts = currentVal.split('-');
+            if (parts.length === 3) {
+                const d = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
+                d.setDate(d.getDate() + offset);
+                dateInput.value = getLocalDateString(d);
+            }
+        }
+        onPlanDateChange();
+    }
+
+    function addTaskToPlanList() {
+        const start = document.getElementById('plan-start-time').value;
+        const end = document.getElementById('plan-end-time').value;
+        const sub = document.getElementById('plan-subject').value;
+        const act = document.getElementById('plan-activity').value;
+        const ch = document.getElementById('plan-chapter').value.trim();
+        const top = document.getElementById('plan-topic').value.trim();
+        
+        const tot = parseInt(document.getElementById('plan-total-qs').value) || 0;
+        const cor = parseInt(document.getElementById('plan-correct-qs').value) || 0;
+        const wrg = parseInt(document.getElementById('plan-wrong-qs').value) || 0;
+
+        if(!ch || !top || !start || !end) {
+            triggerToast("Validation error: Complete chapter, topic and time constraints.");
+            return;
+        }
+
+        const currentTask = { 
+            startTime: start, 
+            endTime: end, 
+            subject: sub, 
+            activity: act, 
+            chapter: ch, 
+            topic: top,
+            totalQs: tot,
+            correctQs: cor,
+            wrongQs: wrg
+        };
+
+        if (editingTaskIndex !== null) {
+            localStagedTasks[editingTaskIndex] = currentTask;
+            editingTaskIndex = null;
+            document.getElementById('target-item-title').innerText = "Add Individual Task Target";
+            document.getElementById('btn-add-plan-item').innerText = "+ Add Target Item";
+        } else {
+            localStagedTasks.push(currentTask);
+        }
+        
+        isPlanDraftDirty = true; // Mark as unsaved draft
+        
+        document.getElementById('plan-chapter').value = "";
+        document.getElementById('plan-topic').value = "";
+        document.getElementById('plan-total-qs').value = "0";
+        document.getElementById('plan-correct-qs').value = "0";
+        document.getElementById('plan-wrong-qs').value = "0";
+        
+        renderStagedUIList();
+    }
+
+    function editStagedTask(index) {
+        editingTaskIndex = index;
+        const t = localStagedTasks[index];
+
+        document.getElementById('plan-start-time').value = t.startTime;
+        document.getElementById('plan-end-time').value = t.endTime;
+        document.getElementById('plan-subject').value = t.subject;
+        document.getElementById('plan-activity').value = t.activity;
+        document.getElementById('plan-chapter').value = t.chapter;
+        document.getElementById('plan-topic').value = t.topic;
+        document.getElementById('plan-total-qs').value = t.totalQs || 0;
+        document.getElementById('plan-correct-qs').value = t.correctQs || 0;
+        document.getElementById('plan-wrong-qs').value = t.wrongQs || 0;
+
+        document.getElementById('target-item-title').innerText = "⚠️ Editing Staged Item";
+        document.getElementById('btn-add-plan-item').innerText = "Update Staged Item";
+    }
+
+    function removeStagedTask(index) {
+        localStagedTasks.splice(index, 1);
+        isPlanDraftDirty = true; // Mark list as updated
+        if(editingTaskIndex === index) {
+            editingTaskIndex = null;
+            document.getElementById('target-item-title').innerText = "Add Individual Task Target";
+            document.getElementById('btn-add-plan-item').innerText = "+ Add Target Item";
+        }
+        renderStagedUIList();
+    }
+
+    function renderStagedUIList() {
+        const box = document.getElementById('staged-plan-items');
+        box.innerHTML = "";
+        if(localStagedTasks.length === 0) {
+            box.innerHTML = `<small style="color:#64748b;">No individual blocks staged yet.</small>`;
+            return;
+        }
+        localStagedTasks.sort((a,b) => a.startTime.localeCompare(b.startTime));
+        
+        localStagedTasks.forEach((t, index) => {
+            const div = document.createElement('div');
+            div.className = "plan-item-row";
+            
+            let metricsText = t.totalQs > 0 ? ` [Target Qs: ${t.totalQs} | C: ${t.correctQs}/W: ${t.wrongQs}]` : '';
+            
+            div.innerHTML = `
+                <span><code>${t.startTime} - ${t.endTime}</code> | <b>${t.subject}</b> - ${t.activity}: <small>${t.chapter} (${t.topic})</small> <b style="color:var(--primary)">${metricsText}</b></span>
+                <div>
+                    <button type="button" class="btn-action btn-edit" onclick="editStagedTask(${index})">Edit</button>
+                    <button type="button" class="btn-action btn-delete" onclick="removeStagedTask(${index})">✕</button>
+                </div>
+            `;
+            box.appendChild(div);
+        });
+    }
+
+    function commitFullPlan() {
+        const date = document.getElementById('plan-date').value;
+        if(localStagedTasks.length === 0) {
+            triggerToast("Staging queue empty. Draft at least one plan step.");
+            return;
+        }
+
+        db.transaction(["plans"], "readwrite").objectStore("plans").put({
+            date: date,
+            tasks: localStagedTasks
+        }).onsuccess = () => {
+            isPlanDraftDirty = false; // Plan saved successfully
+            triggerToast("Day structured plan compiled and locked.");
+            updateLiveStorageIndicator();
+            refreshDropdownLists();
+            loadPlanComparison();
+        };
+    }
+
+    // THE COMPREHENSIVE SIDE-BY-SIDE PLANNED VS ACTUAL MATRIX
+    function loadPlanComparison() {
+        if (!db) return;
+        const targetDate = document.getElementById('plan-date').value;
+        lastLoadedDate = targetDate;
+
+        db.transaction("plans").objectStore("plans").get(targetDate).onsuccess = (e) => {
+            const planData = e.target.result;
+            localStagedTasks = planData ? planData.tasks : [];
+            isPlanDraftDirty = false;
+            renderStagedUIList();
+            refreshActualLogsForComparison(targetDate);
+        };
+    }
+
+    function refreshActualLogsForComparison(targetDate) {
+        if (!db) return;
+        const output = document.getElementById('comparison-output');
+        output.innerHTML = "";
+
+        db.transaction("studyLogs").objectStore("studyLogs").getAll().onsuccess = (ev) => {
+            const dayLogs = ev.target.result.filter(item => item.date === targetDate);
+
+            let totalPlanQs = 0, expectedCorrect = 0, allowedWrong = 0;
+            localStagedTasks.forEach(t => {
+                totalPlanQs += (t.totalQs || 0);
+                expectedCorrect += (t.correctQs || 0);
+                allowedWrong += (t.wrongQs || 0);
+            });
+
+            let totalActualQs = 0, actualCorrect = 0, actualWrong = 0;
+            dayLogs.forEach(l => {
+                totalActualQs += (l.total || 0);
+                actualCorrect += (l.correct || 0);
+                actualWrong += (l.wrong || 0);
+            });
+
+            let summaryBannerHtml = `
+                <div class="summary-banner">
+                    <div class="metric-tile">
+                        <strong>Total Questions</strong>
+                        <div style="margin-top:5px; font-size:1.1rem;">
+                            <span style="color:var(--warning)">Plan: ${totalPlanQs}</span> | 
+                            <span style="color:var(--primary)">Actual: ${totalActualQs}</span>
+                        </div>
+                    </div>
+                    <div class="metric-tile">
+                        <strong style="color:var(--success)">Correct Answers</strong>
+                        <div style="margin-top:5px; font-size:1.1rem;">
+                            <span>Target: ${expectedCorrect}</span> | 
+                            <span>Hit: ${actualCorrect}</span>
+                        </div>
+                    </div>
+                    <div class="metric-tile">
+                        <strong style="color:var(--danger)">Wrong Margins</strong>
+                        <div style="margin-top:5px; font-size:1.1rem;">
+                            <span>Max Allowed: ${allowedWrong}</span> | 
+                            <span>Logged: ${actualWrong}</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            let planColumnHtml = `<div class="comp-card planned"><h3>🎯 Planned Targets</h3>`;
+            if (localStagedTasks.length === 0) {
+                planColumnHtml += `<p style="color:var(--warning); margin-top:8px;">No targeted schedule defined for this date.</p>`;
+            } else {
+                planColumnHtml += `<table>`;
+                localStagedTasks.sort((a,b) => a.startTime.localeCompare(b.startTime)).forEach(t => {
+                    let mq = t.totalQs > 0 ? `<br><small style="color:var(--success)"><b>Qs: ${t.totalQs}</b> (C:${t.correctQs}/W:${t.wrongQs})</small>` : '';
+                    planColumnHtml += `<tr>
+                        <td><code style="font-weight:600;">${t.startTime}-${t.endTime}</code></td>
+                        <td><b>${t.subject}</b> - ${t.activity}${mq}<br><small style="color:#475569">${t.chapter} (${t.topic})</small></td>
+                    </tr>`;
+                });
+                planColumnHtml += `</table>`;
+            }
+            planColumnHtml += `</div>`;
+
+            let actualColumnHtml = `<div class="comp-card actual"><h3>⚡ Actual Executed Logs</h3>`;
+            if (dayLogs.length === 0) {
+                actualColumnHtml += `<p style="color:#64748b; margin-top:8px;">No execution tracks logged for this date yet.</p>`;
+            } else {
+                actualColumnHtml += `<table>`;
+                dayLogs.sort((a,b) => a.startTime.localeCompare(b.startTime)).forEach(l => {
+                    actualColumnHtml += `<tr>
+                        <td><code style="font-weight:600;">${l.startTime}-${l.endTime}</code></td>
+                        <td><b>${l.subject}</b> - <span class="badge info">${l.activity}</span><br>
+                        <small style="color:#475569">${l.chapter} (${l.topic})</small><br>
+                        <small style="color:var(--primary)">Done: <b>${l.total}</b> | <span style="color:var(--success)">${l.correct}C</span> / <span style="color:var(--danger)">${l.wrong}W</span></small></td>
+                    </tr>`;
+                });
+                actualColumnHtml += `</table>`;
+            }
+            actualColumnHtml += `</div>`;
+
+            output.innerHTML = `
+                <h3 style="margin-bottom:12px;">Analytics Matrix For Date: <code>${targetDate}</code></h3>
+                ${summaryBannerHtml}
+                <div class="comparison-grid">${planColumnHtml}${actualColumnHtml}</div>
+            `;
+        };
+    }
+
+    // HISTORICAL/LOGS SUMMARY ENGINE
+    function renderTodaySummary() {
+        if (!db) return;
+        const container = document.getElementById('today-summary-box');
+        const activeDate = document.getElementById('study-date').value;
+        container.innerHTML = "";
+
+        db.transaction("studyLogs").objectStore("studyLogs").getAll().onsuccess = (e) => {
+            const items = e.target.result.filter(item => item.date === activeDate);
+            if(items.length === 0) {
+                container.innerHTML = `<p style="color: #64748b;">Zero tracks recorded for ${activeDate}.</p>`;
+                return;
+            }
+            let html = `<h3>Logs for ${activeDate}:</h3><table><tr><th>Duration</th><th>Subject / Topic</th><th>Activity</th><th>C / W</th></tr>`;
+            items.sort((a,b) => b.startTime.localeCompare(a.startTime)).forEach(i => {
+                html += `<tr>
+                    <td><code>${i.startTime || '--:--'} - ${i.endTime || '--:--'}</code></td>
+                    <td><b>${i.subject}</b><br><small style="color:#64748b">${i.topic}</small></td>
+                    <td><span class="badge" style="background:#e2e8f0">${i.activity}</span></td>
+                    <td><span style="color:var(--success)">${i.correct}</span> / <span style="color:var(--danger)">${i.wrong}</span></td>
+                </tr>`;
+            });
+            html += `</table>`;
+            container.innerHTML = html;
+        };
+    }
+
+    function renderHistory() {
+        if(!db) return;
+        
+        const studyTableBody = document.querySelector("#study-table tbody");
+        studyTableBody.innerHTML = "";
+        db.transaction("studyLogs").objectStore("studyLogs").getAll().onsuccess = (e) => {
+            const logs = e.target.result;
+            logs.sort((a,b) => b.date.localeCompare(a.date) || b.startTime.localeCompare(a.startTime));
+            
+            logs.forEach(log => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td><code>${log.date}</code></td>
+                    <td><code>${log.startTime || '--:--'} - ${log.endTime || '--:--'}</code></td>
+                    <td><b>${log.subject}</b></td>
+                    <td>${log.chapter} (<small>${log.topic}</small>)</td>
+                    <td><span class="badge" style="background:#e2e8f0">${log.activity}</span></td>
+                    <td>${log.total}</td>
+                    <td><span style="color:var(--success)">${log.correct}</span> / <span style="color:var(--danger)">${log.wrong}</span></td>
+                    <td>
+                        <button class="btn-action btn-edit" onclick="editStudyLog(${log.id})">Edit</button>
+                        <button class="btn-action btn-delete" onclick="deleteStudyLog(${log.id})">Del</button>
+                    </td>
+                `;
+                studyTableBody.appendChild(tr);
+            });
+        };
+
+        const testTableBody = document.querySelector("#test-table tbody");
+        testTableBody.innerHTML = "";
+        db.transaction("testLogs").objectStore("testLogs").getAll().onsuccess = (e) => {
+            const testLogs = e.target.result;
+            testLogs.sort((a,b) => b.date.localeCompare(a.date));
+
+            testLogs.forEach(log => {
+                const accuracy = log.total > 0 ? Math.round((log.correct / log.total) * 100) : 0;
+                let accuracyBadgeClass = 'danger';
+                if (accuracy >= 75) accuracyBadgeClass = 'success';
+                else if (accuracy >= 55) accuracyBadgeClass = 'warning';
+
+                const scopeDisplay = log.subject ? `${log.subject} - <small>${log.chapter}</small>` : log.topics;
+
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td><code>${log.date}</code></td>
+                    <td>${scopeDisplay}</td>
+                    <td><span class="badge ${log.difficulty==='Hard'?'danger':log.difficulty==='Easy'?'success':''}" style="${log.difficulty==='Medium'?'background:#fef3c7;color:#d97706':''}">${log.difficulty}</span></td>
+                    <td>${log.time}m</td>
+                    <td>Total: ${log.total} | <span style="color:var(--success)">C: ${log.correct}</span> | <span style="color:var(--danger)">W: ${log.wrong}</span></td>
+                    <td><span class="badge ${accuracyBadgeClass}">${accuracy}%</span></td>
+                    <td>
+                        <button class="btn-action btn-edit" onclick="editTestLog(${log.id})">Edit</button>
+                        <button class="btn-action btn-delete" onclick="deleteTestLog(${log.id})">Del</button>
+                    </td>
+                `;
+                testTableBody.appendChild(tr);
+            });
+        };
+    }
+</script>
+</body>
+</html>

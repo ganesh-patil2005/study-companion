@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <!-- Background circle -->
+  <circle cx="256" cy="256" r="256" fill="#2f6fed"/>
+  <!-- Open book shape -->
+  <rect x="90" y="160" width="148" height="192" rx="14" ry="14" fill="#fff" opacity="0.95"/>
+  <rect x="274" y="160" width="148" height="192" rx="14" ry="14" fill="#fff" opacity="0.95"/>
+  <!-- Spine -->
+  <rect x="242" y="155" width="28" height="202" rx="6" ry="6" fill="#2f6fed"/>
+  <!-- Lines on left page -->
+  <rect x="108" y="200" width="110" height="10" rx="4" fill="#2f6fed" opacity="0.4"/>
+  <rect x="108" y="222" width="90" height="10" rx="4" fill="#2f6fed" opacity="0.4"/>
+  <rect x="108" y="244" width="100" height="10" rx="4" fill="#2f6fed" opacity="0.4"/>
+  <rect x="108" y="266" width="80" height="10" rx="4" fill="#2f6fed" opacity="0.4"/>
+  <rect x="108" y="288" width="105" height="10" rx="4" fill="#2f6fed" opacity="0.4"/>
+  <rect x="108" y="310" width="70" height="10" rx="4" fill="#2f6fed" opacity="0.4"/>
+  <!-- Lines on right page -->
+  <rect x="292" y="200" width="110" height="10" rx="4" fill="#2f6fed" opacity="0.4"/>
+  <rect x="292" y="222" width="90" height="10" rx="4" fill="#2f6fed" opacity="0.4"/>
+  <rect x="292" y="244" width="100" height="10" rx="4" fill="#2f6fed" opacity="0.4"/>
+  <rect x="292" y="266" width="80" height="10" rx="4" fill="#2f6fed" opacity="0.4"/>
+  <rect x="292" y="288" width="105" height="10" rx="4" fill="#2f6fed" opacity="0.4"/>
+  <rect x="292" y="310" width="70" height="10" rx="4" fill="#2f6fed" opacity="0.4"/>
+  <!-- Star accent -->
+  <polygon points="256,92 264,114 288,114 269,127 276,150 256,137 236,150 243,127 224,114 248,114" fill="#FFD700"/>
+</svg>
